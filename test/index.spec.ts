@@ -22,7 +22,7 @@ describe('api tests', () => {
         assert.equal(commitment.toLowerCase(), 'ab87358a111c3cd9da8aadf4b414e9f6be5ac83d923fb70d8d27fef1e2690b4cad015b23b8c058881da78a05c62b1173')
         const proof = kzg.computeBlobKzgProof(blob, hexToBytes('0x' + commitment))
         assert.equal(proof.toLowerCase(), '8dd951edb4e0df1779c29d28b835a2cc8b26ebf69a38d7d9afadd0eb8a4cbffd9db1025fd253e91e00a9904f109e81e3')
-        const proofVerified = kzg.verifyBlobKzgProof(blob, hexToBytes('0x' + commitment), hexToBytes('0x' + proof))
+        const proofVerified = kzg.verifyBlobKzgProofBatch([blob], [hexToBytes('0x' + commitment)], [hexToBytes('0x' + proof)])
         assert.equal(proofVerified, 0)
         kzg.freeTrustedSetup()
     })
