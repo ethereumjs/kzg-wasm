@@ -1,0 +1,23 @@
+{
+  "name": "kzg-wasm",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "build": "tsc && cp src/wasm -r dist",
+    "test": "vitest run test/*"
+  },
+  "author": "",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "type": "module",
+  "license": "MIT",
+  "devDependencies": {
+    "@ethereumjs/util": "^9.0.2",
+    "@vitest/browser": "^1.2.2",
+    "prettier": "^3.2.5",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.2",
+    "webdriverio": "^8.31.1"
+  }
+}
