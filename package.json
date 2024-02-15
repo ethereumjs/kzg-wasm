@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "build": "tsc && cp src/wasm -r dist",
+    "build": "rm -rf dist && tsc && cp src/wasm -r dist",
     "test": "vitest run test/*"
   },
   "author": "",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "type": "module",
   "license": "MIT",
   "devDependencies": {
