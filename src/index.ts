@@ -1,6 +1,7 @@
 // @ts-ignore
+import { hexToBytes } from './util.js'
 import kzgWasm from './wasm/kzg.js'
-import { hexToBytes } from '@ethereumjs/util'
+
 export const initKzg = async () => {
     const module = await kzgWasm()
 

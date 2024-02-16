@@ -1,9 +1,9 @@
 
 var kzg = (() => {
-  var _scriptDir = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : undefined;
-  if (typeof __filename !== 'undefined') _scriptDir ||= __filename;
+  var _scriptDir = import.meta.url;
+  
   return (
-function(moduleArg = {}) {
+async function(moduleArg = {}) {
 
 var Module = moduleArg;
 
@@ -65,12 +65,14 @@ if (ENVIRONMENT_IS_NODE) {
  if (numericVersion < 16e4) {
   throw new Error("This emscripten-generated code requires node v16.0.0 (detected v" + nodeVersion + ")");
  }
+ const {createRequire: createRequire} = await import("module");
+ /** @suppress{duplicate} */ var require = createRequire(import.meta.url);
  var fs = require("fs");
  var nodePath = require("path");
  if (ENVIRONMENT_IS_WORKER) {
   scriptDirectory = nodePath.dirname(scriptDirectory) + "/";
  } else {
-  scriptDirectory = __dirname + "/";
+  scriptDirectory = require("url").fileURLToPath(new URL("./", import.meta.url));
  }
  read_ = (filename, binary) => {
   filename = isFileURI(filename) ? new URL(filename) : nodePath.normalize(filename);
@@ -621,10 +623,13 @@ function createExportWrapper(name) {
 
 var wasmBinaryFile;
 
-wasmBinaryFile = "kzg.wasm";
-
-if (!isDataURI(wasmBinaryFile)) {
- wasmBinaryFile = locateFile(wasmBinaryFile);
+if (Module["locateFile"]) {
+ wasmBinaryFile = "kzg.wasm";
+ if (!isDataURI(wasmBinaryFile)) {
+  wasmBinaryFile = locateFile(wasmBinaryFile);
+ }
+} else {
+ wasmBinaryFile = new URL("kzg.wasm", import.meta.url).href;
 }
 
 function getBinarySync(file) {
@@ -4892,7 +4897,4 @@ run();
 }
 );
 })();
-if (typeof exports === 'object' && typeof module === 'object')
-  module.exports = kzg;
-else if (typeof define === 'function' && define['amd'])
-  define([], () => kzg);
+export default kzg;

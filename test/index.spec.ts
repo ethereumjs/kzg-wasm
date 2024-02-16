@@ -1,6 +1,6 @@
 import { describe, it, assert, beforeEach } from 'vitest'
 import { initKzg } from '../src/index.js'
-import { bytesToHex, hexToBytes } from '@ethereumjs/util'
+import { bytesToHex, hexToBytes } from '../src/util.js'
 
 const BYTES_PER_FIELD_ELEMENT = 4096
 const FIELD_ELEMENTS_PER_BLOB = 32
