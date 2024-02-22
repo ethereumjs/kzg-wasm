@@ -6,7 +6,7 @@
     "build": "rm -rf dist && tsc && cp src/wasm -r dist",
     "test": "vitest run test/*",
     "test:browser": "npx vitest run -c vitest.config.browser.ts test/* --browser.mode=headless --browser.name=chrome",
-    "postinstall": "npm run build"
+    "prepare": "npm run build"
   },
   "author": "",
   "main": "dist/index.js",
