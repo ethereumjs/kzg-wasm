@@ -1,5 +1,4 @@
-/****************  Borrowed from @chainsafe/ssz */
-// Caching this info costs about ~1000 bytes and speeds up toHexString() by x6
+/****************  Borrowed wholesale from @ethereumjs/util to avoid external dependencies  *******/
 const hexByByte = Array.from({ length: 256 }, (v, i) => i.toString(16).padStart(2, '0'))
 
 export const bytesToHex = (bytes: Uint8Array): string => {

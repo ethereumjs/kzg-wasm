@@ -25,7 +25,7 @@ describe('api tests', () => {
     const proof = kzg.computeBlobKzgProof(blob, commitment)
     assert.equal(bytesToHex(proof).slice(2), '8dd951edb4e0df1779c29d28b835a2cc8b26ebf69a38d7d9afadd0eb8a4cbffd9db1025fd253e91e00a9904f109e81e3')
     const proofVerified = kzg.verifyBlobKzgProofBatch([blob], [commitment], [proof])
-    assert.equal(proofVerified, 0)
+    assert.equal(proofVerified, true)
     kzg.freeTrustedSetup()
   })
   it('should verify kzg proofs with points', async () => {
@@ -48,7 +48,7 @@ describe('api tests', () => {
     }
 
     const verifiedKzgProof = kzg.verifyKzgProof(precompileData.Commitment, precompileData.z, precompileData.y, precompileData.Proof)
-    assert.equal(verifiedKzgProof, 0)
+    assert.equal(verifiedKzgProof, true)
     kzg.freeTrustedSetup()
   })
 })
