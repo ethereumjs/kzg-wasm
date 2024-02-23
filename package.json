@@ -9,9 +9,16 @@
     "test:browser": "npx vitest run -c vitest.config.browser.ts test/*",
     "prepare": "npm run build"
   },
-  "author": "",
+  "author": "acolytec3",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
   "license": "MIT",
   "devDependencies": {
     "@vitest/browser": "^1.2.2",

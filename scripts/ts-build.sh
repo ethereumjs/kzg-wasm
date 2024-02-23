@@ -33,8 +33,19 @@ dim() {
 
 build_node() {
     blue "[Node build] "
-    echo "Using tsconfig.prod.cjs.json"
-
+    echo "Using tsconfig.json"
+    echo "Adding ./dist/cjs/package.json"
+    if ! [ -d ./dist/cjs ];
+    then
+        mkdir dist
+        mkdir ./dist/cjs
+    fi
+    rm -f ./dist/cjs/package.json
+    cat <<EOT >> ./dist/cjs/package.json
+{
+    "type": "commonjs"
+}
+EOT
     echo "> tsc --build ./tsconfig.json"
     printf "${BLUE}[Node build] Working... "
 
@@ -50,6 +61,17 @@ build_esm() {
         blue "[ESM build] "
         echo "Using tsconfig.esm.json"
 
+        echo "Adding ./dist/esm/package.json"
+        if ! [ -d ./dist/esm ];
+        then
+            mkdir ./dist/esm
+        fi
+        rm -f ./dist/esm/package.json
+        cat <<EOT >> ./dist/esm/package.json
+{
+    "type": "module"
+}
+EOT
         echo "> tsc --build ./tsconfig.esm.json"
         printf "${BLUE}[ESM build] Working... "
 
@@ -61,33 +83,6 @@ build_esm() {
     echo "\n";
 }
 
-post_build_fixes() {
-    blue "[Post Build Fixes]"
-    if [ -f ./dist/esm/index.js ];
-    then
-        echo "Adding ./dist/cjs/package.json"
-        rm -f ./dist/cjs/package.json
-        cat <<EOT >> ./dist/cjs/package.json
-{
-    "type": "commonjs"
-}
-EOT
-        echo "Adding ./dist/esm/package.json"
-        rm -f ./dist/esm/package.json
-        cat <<EOT >> ./dist/esm/package.json
-{
-    "type": "module"
-}
-EOT
-    else
-        echo "Skipping post build fixes (no ESM setup yet)."
-    fi
-    echo "\n";
-}
-
-
-
 # Begin build process.
 build_node
 build_esm
-post_build_fixes
