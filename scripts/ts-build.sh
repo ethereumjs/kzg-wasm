@@ -50,6 +50,8 @@ EOT
     printf "${BLUE}[Node build] Working... "
 
     npx tsc --build ./tsconfig.json
+    cp ./src/wasm/kzg.wasm ./dist/cjs/wasm
+    cp ./src/wasm/kzg.wasm.map ./dist/cjs/wasm
     green "DONE"
 
     echo "\n";
@@ -76,6 +78,8 @@ EOT
         printf "${BLUE}[ESM build] Working... "
 
         npx tsc --build ./tsconfig.esm.json
+        cp ./src/wasm/kzg.wasm ./dist/esm/wasm
+        cp ./src/wasm/kzg.wasm.map ./dist/esm/wasm
         green "DONE"
     else
         echo "Skipping ESM build (no config available)."
