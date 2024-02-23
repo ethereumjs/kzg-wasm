@@ -3,12 +3,11 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "build": "tsc",
-    "build:esm": "tsc -p tsconfig.esm.json",
+    "build": "scripts/ts-build.sh",
     "clean": "rm -rf dist && rm -rf node_modules",
     "test": "vitest run test/*",
     "test:browser": "npx vitest run -c vitest.config.browser.ts test/*",
-    "prepare": "npm run build && npm run build:esm"
+    "prepare": "npm run build"
   },
   "author": "",
   "main": "dist/cjs/index.js",
