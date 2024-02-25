@@ -64,8 +64,6 @@ if (ENVIRONMENT_IS_NODE) {
  if (numericVersion < 16e4) {
   throw new Error("This emscripten-generated code requires node v16.0.0 (detected v" + nodeVersion + ")");
  }
- const {createRequire: createRequire} = await import("module");
- /** @suppress{duplicate} */ var require = createRequire(import.meta.url);
  var fs = require("fs");
  var nodePath = require("path");
  if (ENVIRONMENT_IS_WORKER) {
