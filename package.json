@@ -4,6 +4,8 @@
   "description": "",
   "scripts": {
     "build": "scripts/ts-build.sh",
+    "transpileCJS": "rm dist/cjs/wasm/kzg.js && babel src/wasm/kzg.js -d dist/cjs/wasm ",
+    "fixRequire": "sed -i \"s/\\_require('url')/require('url')/g\" dist/cjs/wasm/kzg.js",
     "clean": "rm -rf dist && rm -rf node_modules",
     "test": "vitest run test/*",
     "test:browser": "npx vitest run -c vitest.config.browser.ts test/*",
@@ -21,8 +23,13 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@babel/cli": "^7.23.9",
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
     "@vitest/browser": "^1.2.2",
     "@vitest/utils": "^1.2.2",
+    "babel-plugin-search-and-replace": "^1.1.1",
+    "babel-plugin-transform-import-meta": "^2.2.1",
     "prettier": "^3.2.5",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",
