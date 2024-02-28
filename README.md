@@ -6,17 +6,17 @@ This library is produced by building the original C code to WASM using the [`emp
 
 ## Usage
 
-This module exposes a single export, an async function called `initKzg` which loads and compiles the WASM object and returns an object that exposes the API defined in the `KZG` type interface in [`@ethereum/util`](https://github.com/ethereumjs/ethereumjs-monorepo/blob/e1221c98f3be0ba4224416f10d91ed4aa50130d8/packages/util/src/kzg.ts#L4)
+This module exposes a single export, an async function called `createKZG` which loads and compiles the WASM object and returns an object that exposes the API defined in the `KZG` type interface in [`@ethereum/util`](https://github.com/ethereumjs/ethereumjs-monorepo/blob/e1221c98f3be0ba4224416f10d91ed4aa50130d8/packages/util/src/kzg.ts#L4)
 
 To use with the `@ethereumjs` libraries, do the following:
 
 ```ts
-import { initKzg } from 'kzg-wasm'
+import { createKZG } from 'kzg-wasm'
 import { Common, Chain, Hardfork } from '@ethereumjs/common'
 import { initKZG } from '@ethereumjs/util'
 
 const main = async () => {
-    const kzg = await initKzg()
+    const kzg = await createKZG()
     initKZG(kzg, '')
     const common = new Common({
         chain: Chain.Mainnet,
