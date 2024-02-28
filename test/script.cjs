@@ -1,8 +1,8 @@
-const initKzg = require('../dist/cjs/index')
+const createKZG = require('../dist/cjs/index')
 
 const main = async () => {
-    console.log(initKzg)
-    const kzg = await initKzg.initKzg()
+    console.log(createKZG)
+    const kzg = await createKZG.createKZG()
     console.log(kzg)
 }
 

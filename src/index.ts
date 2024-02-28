@@ -1,7 +1,7 @@
 import { hexToBytes } from './util.js'
 import kzgWasm from './wasm/kzg.js'
 
-export const initKzg = async () => {
+export const createKZG = async () => {
     const module = await kzgWasm()
 
     const loadTrustedSetup = module.cwrap('load_trusted_setup_file_from_wasm', null, [])

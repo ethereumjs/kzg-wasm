@@ -1,5 +1,5 @@
 import { describe, it, assert, beforeEach } from 'vitest'
-import { initKzg } from '../src/index.js'
+import { createKZG } from '../src/index.js'
 import { bytesToHex, hexToBytes } from '../src/util.js'
 
 const BYTES_PER_FIELD_ELEMENT = 4096
@@ -8,14 +8,14 @@ const BYTES_PER_BLOB = BYTES_PER_FIELD_ELEMENT * FIELD_ELEMENTS_PER_BLOB
 
 describe('api tests', () => {
   it('should initialize', async () => {
-    const kzg = await initKzg()
+    const kzg = await createKZG()
     const res = kzg.loadTrustedSetup()
     assert.equal(res, 0, 'loaded trusted setup')
     kzg.freeTrustedSetup()
 
   })
   it('should generate kzg commitments and verify proofs', async () => {
-    const kzg = await initKzg()
+    const kzg = await createKZG()
     kzg.loadTrustedSetup()
     const blob = new Uint8Array(BYTES_PER_BLOB)
     blob[0] = 0x01
@@ -29,7 +29,7 @@ describe('api tests', () => {
     kzg.freeTrustedSetup()
   })
   it('should verify kzg proofs with points', async () => {
-    const kzg = await initKzg()
+    const kzg = await createKZG()
     kzg.loadTrustedSetup()
 
     const precompileData = {
