@@ -20,7 +20,6 @@ const config = defineConfig({
     nodePolyfills({
       include: ['util', 'fs', 'buffer'],
     }),
-    topLevelAwait(),
     wasm()
   ],
 })
