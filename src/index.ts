@@ -1,6 +1,10 @@
 import { hexToBytes } from './util.js'
 import kzgWasm from './wasm/kzg.js'
 
+/**
+ * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
+ * @returns object - the KZG methods required for all 4844 related operations
+ */
 export const createKZG = async () => {
     const module = await kzgWasm()
 
