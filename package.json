@@ -1,6 +1,6 @@
 {
   "name": "kzg-wasm",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "",
   "scripts": {
     "build": "npm run build:ts && npm run transpileCJS && npm run fixRequire",
