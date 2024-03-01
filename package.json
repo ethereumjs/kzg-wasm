@@ -5,8 +5,8 @@
   "scripts": {
     "build": "npm run build:ts && npm run transpileCJS && npm run fixRequire",
     "build:ts": "scripts/ts-build.sh",
-    "transpileCJS": "rm dist/cjs/wasm/kzg.js && babel src/wasm/kzg.js -d dist/cjs/wasm",
-    "fixRequire": "sed -i.bak \"s/\\_require('url')/require('url')/g\" dist/cjs/wasm/kzg.js && rm dist/cjs/wasm/kzg.js.bak",
+    "transpileCJS": "rm dist/cjs/kzg.js && babel src/kzg.js -d dist/cjs",
+    "fixRequire": "sed -i.bak \"s/\\_require('url')/require('url')/g\" dist/cjs/kzg.js && rm dist/cjs/kzg.js.bak",
     "clean": "rm -rf dist && rm -rf node_modules",
     "test": "vitest run test/*",
     "test:browser": "npx vitest run -c vitest.config.browser.ts test/*",

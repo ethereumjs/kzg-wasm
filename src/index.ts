@@ -1,5 +1,5 @@
 import { hexToBytes } from './util.js'
-import kzgWasm from './wasm/kzg.js'
+import kzgWasm from './kzg.js'
 
 /**
  * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
