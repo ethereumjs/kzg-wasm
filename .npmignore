@@ -1,4 +1,3 @@
-wasm
 vitest.config.browser.ts
 tsconfig*
 prettier*
