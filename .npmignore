@@ -2,4 +2,8 @@ vitest.config.browser.ts
 tsconfig*
 prettier*
 .babelrc
+.github
 test/*
+scripts/*
+*.tgz
+wasm/kzg.wasm
