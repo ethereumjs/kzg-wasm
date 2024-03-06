@@ -30,14 +30,20 @@ dim() {
 
 
 # Build function declaration.
-
+copy_wasm() {
+    if ! [ -d ./dist ];
+    then
+        mkdir dist
+        mkdir ./dist/wasm
+    fi
+    cp ./wasm/kzg.wasm ./dist/wasm
+}
 build_node() {
     blue "[Node build] "
     echo "Using tsconfig.json"
     echo "Adding ./dist/cjs/package.json"
     if ! [ -d ./dist/cjs ];
     then
-        mkdir dist
         mkdir ./dist/cjs
     fi
     rm -f ./dist/cjs/package.json
@@ -50,7 +56,6 @@ EOT
     printf "${BLUE}[Node build] Working... "
 
     npx tsc --build ./tsconfig.json
-    cp ./src/wasm/kzg.wasm ./dist/cjs/wasm
     green "DONE"
 
     echo "\n";
@@ -77,7 +82,6 @@ EOT
         printf "${BLUE}[ESM build] Working... "
 
         npx tsc --build ./tsconfig.esm.json
-        cp ./src/wasm/kzg.wasm ./dist/esm/wasm
         green "DONE"
     else
         echo "Skipping ESM build (no config available)."
@@ -86,5 +90,6 @@ EOT
 }
 
 # Begin build process.
+copy_wasm
 build_node
 build_esm

@@ -1,0 +1,5 @@
+vitest.config.browser.ts
+tsconfig*
+prettier*
+.babelrc
+test/*
