@@ -1,6 +1,12 @@
 import { hexToBytes } from './util.js'
 import kzgWasm from './kzg.js'
 
+export type TrustedSetup = {
+    g1: string
+    g2: string
+    n1: number  // bytes per element
+    n2: number  // 65
+}
 /**
  * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
  * 
@@ -11,13 +17,17 @@ import kzgWasm from './kzg.js'
 export const loadKZG = async (setupPath?: string) => {
     const module = await kzgWasm()
 
-    const loadTrustedSetup = module.cwrap('load_trusted_setup_file_from_wasm', null, []) as (setupPath?: string) => Number
+    const loadTrustedSetupWasm = module.cwrap('load_trusted_setup_from_wasm', 'number', ['string', 'number','string', 'number']) as (g1: string, n1: number, g2: string, n2: number) => number
     const freeTrustedSetup = module.cwrap('free_trusted_setup_wasm', null, []) as () => void
     const blobToKzgCommitmentWasm = module.cwrap('blob_to_kzg_commitment_wasm', 'string', ['array']) as (blob: Uint8Array) => string
     const computeBlobKzgProofWasm = module.cwrap('compute_blob_kzg_proof_wasm', 'string', ['array', 'array']) as (blob: Uint8Array, commitment: Uint8Array) => string
     const verifyBlobKzgProofWasm = module.cwrap('verify_blob_kzg_proof_wasm', 'string', ['array', 'array', 'array']) as (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => string
     const verifyKzgProofWasm = module.cwrap('verify_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array']) 
 
+    const loadTrustedSetup = (trustedSetup: TrustedSetup) => {
+        return loadTrustedSetupWasm(trustedSetup.g1, trustedSetup.n1, trustedSetup.g2, trustedSetup.n2)
+    }
+    
     const blobToKzgCommitment = (blob: Uint8Array) => {
         const blobHex = '0x' + blobToKzgCommitmentWasm(blob)
         return hexToBytes(blobHex)
@@ -47,11 +57,6 @@ export const loadKZG = async (setupPath?: string) => {
     const verifyKzgProof = (commitment: Uint8Array, z: Uint8Array, y: Uint8Array, proof: Uint8Array) => {
         const res = verifyKzgProofWasm(commitment, z, y, proof)
         return res === 'true'
-    }
-
-    const res = loadTrustedSetup(setupPath)
-    if (res !== 0) {
-        throw new Error(`Loading trusted setup failed (${setupPath ?? 'default setup'})`)
     }
 
     return {

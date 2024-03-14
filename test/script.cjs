@@ -1,8 +1,9 @@
 const loadKZG = require('../dist/cjs/index')
 
 const main = async () => {
-    console.log(loadKZG)
     const kzg = await loadKZG.loadKZG()
+    const json = require('./trustedSetup/trusted_setup.json')
+    kzg.loadTrustedSetup(json)
     console.log(kzg)
 }
 
