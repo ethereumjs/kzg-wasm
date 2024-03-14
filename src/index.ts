@@ -1,6 +1,12 @@
 import { hexToBytes } from './util.js'
 import kzgWasm from './kzg.js'
 
+export type trustedSetup = {
+    g1: string
+    g2: string
+    n1: number  // bytes per element
+    n2: number  // 65
+}
 /**
  * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
  * @returns object - the KZG methods required for all 4844 related operations
@@ -8,13 +14,17 @@ import kzgWasm from './kzg.js'
 export const createKZG = async () => {
     const module = await kzgWasm()
 
-    const loadTrustedSetup = module.cwrap('load_trusted_setup_file_from_wasm', null, [])
+    const loadTrustedSetupWasm = module.cwrap('load_trusted_setup_from_wasm', 'number', ['string', 'number','string', 'number'] )
     const freeTrustedSetup = module.cwrap('free_trusted_setup_wasm', null, [])
     const blobToKzgCommitmentWasm = module.cwrap('blob_to_kzg_commitment_wasm', 'string', ['array']) as (blob: Uint8Array) => string
     const computeBlobKzgProofWasm = module.cwrap('compute_blob_kzg_proof_wasm', 'string', ['array', 'array']) as (blob: Uint8Array, commitment: Uint8Array) => string
     const verifyBlobKzgProofWasm = module.cwrap('verify_blob_kzg_proof_wasm', 'string', ['array', 'array', 'array']) as (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => string
     const verifyKzgProofWasm = module.cwrap('verify_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array']) 
 
+    const loadTrustedSetup = (trustedSetup: trustedSetup) => {
+        return loadTrustedSetupWasm(trustedSetup.g1, trustedSetup.n1, trustedSetup.g2, trustedSetup.n2)
+    }
+    
     const blobToKzgCommitment = (blob: Uint8Array) => {
         const blobHex = '0x' + blobToKzgCommitmentWasm(blob)
         return hexToBytes(blobHex)

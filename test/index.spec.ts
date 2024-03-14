@@ -30,7 +30,8 @@ describe('api tests', () => {
   })
   it('should verify kzg proofs with points', async () => {
     const kzg = await createKZG()
-    kzg.loadTrustedSetup()
+    const json = await import('./trustedSetup/trusted_setup.json')
+    kzg.loadTrustedSetup(json)
 
     const precompileData = {
       Proof: hexToBytes(
