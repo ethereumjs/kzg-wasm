@@ -10,7 +10,7 @@ export type TrustedSetup = {
 /**
  * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
  * 
- * @param setupPath Optional setup path, otherwise official KZG setup from the KZG ceremony is used
+ * @param setupPath Optional setup, otherwise official KZG setup from the KZG ceremony is used
  * 
  * @returns object - the KZG methods required for all 4844 related operations
  */
@@ -29,7 +29,7 @@ export const loadKZG = async () => {
      * @param trustedSetup - an optional trusted setup parameter provided by the user
      * @returns 0 if loaded successfully or 1 otherwise
      */
-    const loadTrustedSetup = (trustedSetup?: TrustedSetup) => {
+    const loadTrustedSetup = (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
         if (trustedSetup === undefined) {
             trustedSetup = mainnetTrustedSetup
         }
@@ -38,7 +38,7 @@ export const loadKZG = async () => {
     
     /**
      * 
-     * @param blob - a blob of data formatted as a Uint8Array of 4096 bytes 
+     * @param blob - a blob of data formatted as a flattened Uint8Array of 4096 big endian KZG field elements
      * @returns a KZG commitment corresponding to the input blob formatted as a 32 byte Uint8Array
      */
     const blobToKzgCommitment = (blob: Uint8Array) => {
