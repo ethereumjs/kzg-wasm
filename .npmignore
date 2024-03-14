@@ -8,3 +8,5 @@ scripts/*
 *.tgz
 wasm/kzg.wasm
 src/trustedSetup.ts
+dist/**/kzg.*.map
+dist/**/kzg.*.ts
