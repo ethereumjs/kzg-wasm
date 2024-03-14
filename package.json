@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "description": "",
   "scripts": {
-    "build": "npm run build:ts && npm run transpileCJS && npm run fixRequire && npm run fixWasmDir",
+    "build": "npm run build:ts && npm run transpileCJS && npm run fixRequire",
     "build:ts": "scripts/ts-build.sh",
     "transpileCJS": "rm dist/cjs/kzg.js && babel src/kzg.js -d dist/cjs",
     "fixRequire": "sed -i.bak \"s/\\_require('url')/require('url')/g\" dist/cjs/kzg.js && rm dist/cjs/kzg.js.bak",
