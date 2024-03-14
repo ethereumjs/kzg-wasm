@@ -1,5 +1,5 @@
 import { describe, it, assert, beforeAll } from 'vitest'
-import { createKZG } from '../src/index.js'
+import { loadKZG } from '../src/index.js'
 import { bytesToHex, hexToBytes } from '../src/util.js'
 
 const BYTES_PER_FIELD_ELEMENT = 4096
@@ -8,21 +8,24 @@ const BYTES_PER_BLOB = BYTES_PER_FIELD_ELEMENT * FIELD_ELEMENTS_PER_BLOB
 
 describe('kzg initialization', () => {
   it('should initialize', async () => {
-    const kzg = await createKZG()
-    const json = await import('./trustedSetup/trusted_setup.json')
-    const res = kzg.loadTrustedSetup(json)
-    assert.equal(res, 0, 'loaded trusted setup')
+    const kzg = await loadKZG()
+    assert.typeOf(kzg.computeBlobKzgProof, 'function' , 'initialized KZG object')
     kzg.freeTrustedSetup()
+  })
+  it('should return nonzero when invalid trusted setup is provided', async () => {
+      const kzg = await loadKZG()
+      const res = kzg.loadTrustedSetup({ g1: 'x12', n1: -1, g2: 'bad coordinates', n2: 0})
+      assert.notOk(res === 0)
   })
 })
 
 describe('kzg API tests', () => {
   let kzg
   beforeAll(async () => {
-    kzg = await createKZG()
-    const json = await import('./trustedSetup/trusted_setup.json')
-    kzg.loadTrustedSetup(json)
+    kzg = await loadKZG()
+    await kzg.loadTrustedSetup()
   })
+
   it('should generate kzg commitments and verify proofs', async () => {
     const blob = new Uint8Array(BYTES_PER_BLOB)
     blob[0] = 0x01
@@ -33,8 +36,8 @@ describe('kzg API tests', () => {
     assert.equal(bytesToHex(proof).slice(2), '8dd951edb4e0df1779c29d28b835a2cc8b26ebf69a38d7d9afadd0eb8a4cbffd9db1025fd253e91e00a9904f109e81e3')
     const proofVerified = kzg.verifyBlobKzgProofBatch([blob], [commitment], [proof])
     assert.equal(proofVerified, true)
-    kzg.freeTrustedSetup()
   })
+
   it('should verify kzg proofs with points', async () => {
     const precompileData = {
       Proof: hexToBytes(
@@ -53,6 +56,5 @@ describe('kzg API tests', () => {
 
     const verifiedKzgProof = kzg.verifyKzgProof(precompileData.Commitment, precompileData.z, precompileData.y, precompileData.Proof)
     assert.equal(verifiedKzgProof, true)
-    kzg.freeTrustedSetup()
   })
 })
