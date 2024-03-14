@@ -3,9 +3,12 @@ import kzgWasm from './kzg.js'
 
 /**
  * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
+ * 
+ * @param setupPath Optional setup path, otherwise official KZG setup from the KZG ceremony is used
+ * 
  * @returns object - the KZG methods required for all 4844 related operations
  */
-export const createKZG = async () => {
+export const createKZG = async (setupPath?: string) => {
     const module = await kzgWasm()
 
     const loadTrustedSetup = module.cwrap('load_trusted_setup_file_from_wasm', null, []) as (setupPath?: string) => Number
@@ -45,6 +48,12 @@ export const createKZG = async () => {
         const res = verifyKzgProofWasm(commitment, z, y, proof)
         return res === 'true'
     }
+
+    const res = loadTrustedSetup(setupPath)
+    if (res !== 0) {
+        throw new Error(`Loading trusted setup failed (${setupPath ?? 'default setup'})`)
+    }
+
     return {
         loadTrustedSetup, freeTrustedSetup, blobToKzgCommitment, computeBlobKzgProof, verifyBlobKzgProofBatch, verifyKzgProof, verifyBlobKzgProof
     }

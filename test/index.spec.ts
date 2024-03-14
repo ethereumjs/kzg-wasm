@@ -9,14 +9,22 @@ const BYTES_PER_BLOB = BYTES_PER_FIELD_ELEMENT * FIELD_ELEMENTS_PER_BLOB
 describe('api tests', () => {
   it('should initialize', async () => {
     const kzg = await createKZG()
-    const res = kzg.loadTrustedSetup()
-    assert.equal(res, 0, 'loaded trusted setup')
+    assert.typeOf(kzg.computeBlobKzgProof, 'function' , 'initialized KZG object')
     kzg.freeTrustedSetup()
-
   })
+
+  it('should throw on unsuccessful setup initialization', async () => {
+    try {
+      await createKZG('test/toast/kzg.txt')
+      assert.fail('should not create KZG object')
+    } catch(e: any) {
+      assert('throws when non-existing path is provided')
+    }
+  })
+
   it('should generate kzg commitments and verify proofs', async () => {
     const kzg = await createKZG()
-    kzg.loadTrustedSetup()
+
     const blob = new Uint8Array(BYTES_PER_BLOB)
     blob[0] = 0x01
     blob[1] = 0x02
@@ -28,9 +36,9 @@ describe('api tests', () => {
     assert.equal(proofVerified, true)
     kzg.freeTrustedSetup()
   })
+
   it('should verify kzg proofs with points', async () => {
     const kzg = await createKZG()
-    kzg.loadTrustedSetup()
 
     const precompileData = {
       Proof: hexToBytes(
