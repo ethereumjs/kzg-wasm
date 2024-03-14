@@ -1,5 +1,5 @@
 import { describe, it, assert, beforeEach } from 'vitest'
-import { createKZG } from '../src/index.js'
+import { loadKZG } from '../src/index.js'
 import { bytesToHex, hexToBytes } from '../src/util.js'
 
 const BYTES_PER_FIELD_ELEMENT = 4096
@@ -8,14 +8,14 @@ const BYTES_PER_BLOB = BYTES_PER_FIELD_ELEMENT * FIELD_ELEMENTS_PER_BLOB
 
 describe('api tests', () => {
   it('should initialize', async () => {
-    const kzg = await createKZG()
+    const kzg = await loadKZG()
     assert.typeOf(kzg.computeBlobKzgProof, 'function' , 'initialized KZG object')
     kzg.freeTrustedSetup()
   })
 
   it('should throw on unsuccessful setup initialization', async () => {
     try {
-      await createKZG('test/toast/kzg.txt')
+      await loadKZG('test/toast/kzg.txt')
       assert.fail('should not create KZG object')
     } catch(e: any) {
       assert('throws when non-existing path is provided')
@@ -23,7 +23,7 @@ describe('api tests', () => {
   })
 
   it('should generate kzg commitments and verify proofs', async () => {
-    const kzg = await createKZG()
+    const kzg = await loadKZG()
 
     const blob = new Uint8Array(BYTES_PER_BLOB)
     blob[0] = 0x01
@@ -38,7 +38,7 @@ describe('api tests', () => {
   })
 
   it('should verify kzg proofs with points', async () => {
-    const kzg = await createKZG()
+    const kzg = await loadKZG()
 
     const precompileData = {
       Proof: hexToBytes(

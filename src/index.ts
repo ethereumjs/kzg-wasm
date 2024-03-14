@@ -8,7 +8,7 @@ import kzgWasm from './kzg.js'
  * 
  * @returns object - the KZG methods required for all 4844 related operations
  */
-export const createKZG = async (setupPath?: string) => {
+export const loadKZG = async (setupPath?: string) => {
     const module = await kzgWasm()
 
     const loadTrustedSetup = module.cwrap('load_trusted_setup_file_from_wasm', null, []) as (setupPath?: string) => Number

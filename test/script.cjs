@@ -1,8 +1,8 @@
-const createKZG = require('../dist/cjs/index')
+const loadKZG = require('../dist/cjs/index')
 
 const main = async () => {
-    console.log(createKZG)
-    const kzg = await createKZG.createKZG()
+    console.log(loadKZG)
+    const kzg = await loadKZG.loadKZG()
     console.log(kzg)
 }
 
