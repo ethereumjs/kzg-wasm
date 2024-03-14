@@ -1,4 +1,4 @@
-import { describe, it, assert, beforeEach } from 'vitest'
+import { describe, it, assert, beforeAll } from 'vitest'
 import { createKZG } from '../src/index.js'
 import { bytesToHex, hexToBytes } from '../src/util.js'
 
@@ -6,17 +6,24 @@ const BYTES_PER_FIELD_ELEMENT = 4096
 const FIELD_ELEMENTS_PER_BLOB = 32
 const BYTES_PER_BLOB = BYTES_PER_FIELD_ELEMENT * FIELD_ELEMENTS_PER_BLOB
 
-describe('api tests', () => {
+describe('kzg initialization', () => {
   it('should initialize', async () => {
     const kzg = await createKZG()
-    const res = kzg.loadTrustedSetup()
+    const json = await import('./trustedSetup/trusted_setup.json')
+    const res = kzg.loadTrustedSetup(json)
     assert.equal(res, 0, 'loaded trusted setup')
     kzg.freeTrustedSetup()
+  })
+})
 
+describe('kzg API tests', () => {
+  let kzg
+  beforeAll(async () => {
+    kzg = await createKZG()
+    const json = await import('./trustedSetup/trusted_setup.json')
+    kzg.loadTrustedSetup(json)
   })
   it('should generate kzg commitments and verify proofs', async () => {
-    const kzg = await createKZG()
-    kzg.loadTrustedSetup()
     const blob = new Uint8Array(BYTES_PER_BLOB)
     blob[0] = 0x01
     blob[1] = 0x02
@@ -29,9 +36,6 @@ describe('api tests', () => {
     kzg.freeTrustedSetup()
   })
   it('should verify kzg proofs with points', async () => {
-    const kzg = await createKZG()
-    kzg.loadTrustedSetup()
-
     const precompileData = {
       Proof: hexToBytes(
         '0xc00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
