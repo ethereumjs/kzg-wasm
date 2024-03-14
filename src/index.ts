@@ -8,8 +8,8 @@ import kzgWasm from './kzg.js'
 export const createKZG = async () => {
     const module = await kzgWasm()
 
-    const loadTrustedSetup = module.cwrap('load_trusted_setup_file_from_wasm', null, [])
-    const freeTrustedSetup = module.cwrap('free_trusted_setup_wasm', null, [])
+    const loadTrustedSetup = module.cwrap('load_trusted_setup_file_from_wasm', null, []) as (setupPath?: string) => Number
+    const freeTrustedSetup = module.cwrap('free_trusted_setup_wasm', null, []) as () => void
     const blobToKzgCommitmentWasm = module.cwrap('blob_to_kzg_commitment_wasm', 'string', ['array']) as (blob: Uint8Array) => string
     const computeBlobKzgProofWasm = module.cwrap('compute_blob_kzg_proof_wasm', 'string', ['array', 'array']) as (blob: Uint8Array, commitment: Uint8Array) => string
     const verifyBlobKzgProofWasm = module.cwrap('verify_blob_kzg_proof_wasm', 'string', ['array', 'array', 'array']) as (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => string
