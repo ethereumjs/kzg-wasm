@@ -39,7 +39,7 @@ export const loadKZG = async () => {
     /**
      * 
      * @param blob - a blob of data formatted as a flattened Uint8Array of 4096 big endian KZG field elements
-     * @returns a KZG commitment corresponding to the input blob formatted as a 32 byte Uint8Array
+     * @returns a KZG commitment corresponding to the input blob formatted as a 48 byte Uint8Array
      */
     const blobToKzgCommitment = (blob: Uint8Array) => {
         const blobHex = '0x' + blobToKzgCommitmentWasm(blob)
@@ -48,9 +48,9 @@ export const loadKZG = async () => {
 
     /**
      * 
-     * @param blob  - a blob of data formatted as a Uint8Array of 4096 bytes 
-     * @param commitment - a KZG commitment corresponding to a blob formatted as a 32 byte Uint8Array
-     * @returns a KZG proof corresponding to the blob and KZG commitment
+     * @param blob  - a blob of data formatted as a flattened Uint8Array of 4096 big endian KZG field elements
+     * @param commitment - a KZG commitment corresponding to a blob formatted as a 48 byte Uint8Array
+     * @returns a 48 byte KZG proof corresponding to the blob and KZG commitment
      */
     const computeBlobKzgProof = (blob: Uint8Array, commitment: Uint8Array) => {
         const proofHex = '0x' + computeBlobKzgProofWasm(blob, commitment)
@@ -77,9 +77,9 @@ export const loadKZG = async () => {
 
     /**
      * 
-     * @param blob - a blob of data formatted as a 4096 byte Uint8Array
-     * @param commitment - a KZG commitment corresponding to the blob
-     * @param proof - a KZG proof corresponding to the blob and commitment
+     * @param blob - a blob of data formatted as a flattened Uint8Array of 4096 big endian KZG field elements
+     * @param commitment - a 48 byte KZG commitment corresponding to the blob
+     * @param proof - a 48 byte KZG proof corresponding to the blob and commitment
      * @returns true if proof is verified; false otherwise
      */
     const verifyBlobKzgProof = (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => {
