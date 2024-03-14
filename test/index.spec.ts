@@ -12,23 +12,18 @@ describe('kzg initialization', () => {
     assert.typeOf(kzg.computeBlobKzgProof, 'function' , 'initialized KZG object')
     kzg.freeTrustedSetup()
   })
+  it('should return nonzero when invalid trusted setup is provided', async () => {
+      const kzg = await loadKZG()
+      const res = kzg.loadTrustedSetup({ g1: 'x12', n1: -1, g2: 'bad coordinates', n2: 0})
+      assert.notOk(res === 0)
+  })
 })
 
 describe('kzg API tests', () => {
   let kzg
   beforeAll(async () => {
     kzg = await loadKZG()
-    const json = await import('./trustedSetup/trusted_setup.json')
-    kzg.loadTrustedSetup(json)
-  })
-
-  it('should throw on unsuccessful setup initialization', async () => {
-    try {
-      await loadKZG('test/toast/kzg.txt')
-      assert.fail('should not create KZG object')
-    } catch(e: any) {
-      assert('throws when non-existing path is provided')
-    }
+    await kzg.loadTrustedSetup()
   })
 
   it('should generate kzg commitments and verify proofs', async () => {
@@ -41,7 +36,6 @@ describe('kzg API tests', () => {
     assert.equal(bytesToHex(proof).slice(2), '8dd951edb4e0df1779c29d28b835a2cc8b26ebf69a38d7d9afadd0eb8a4cbffd9db1025fd253e91e00a9904f109e81e3')
     const proofVerified = kzg.verifyBlobKzgProofBatch([blob], [commitment], [proof])
     assert.equal(proofVerified, true)
-    kzg.freeTrustedSetup()
   })
 
   it('should verify kzg proofs with points', async () => {
@@ -62,6 +56,5 @@ describe('kzg API tests', () => {
 
     const verifiedKzgProof = kzg.verifyKzgProof(precompileData.Commitment, precompileData.z, precompileData.y, precompileData.Proof)
     assert.equal(verifiedKzgProof, true)
-    kzg.freeTrustedSetup()
   })
 })
