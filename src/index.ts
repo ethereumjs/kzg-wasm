@@ -10,11 +10,11 @@ export type TrustedSetup = {
 /**
  * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
  * 
- * @param setupPath Optional setup, otherwise official KZG setup from the KZG ceremony is used
+ * @param trustedSetup Optional trusted setup, otherwise official KZG setup from the KZG ceremony is used
  * 
  * @returns object - the KZG methods required for all 4844 related operations
  */
-export const loadKZG = async () => {
+export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
     const module = await kzgWasm()
 
     const loadTrustedSetupWasm = module.cwrap('load_trusted_setup_from_wasm', 'number', ['string', 'number','string', 'number']) as (g1: string, n1: number, g2: string, n2: number) => number
@@ -30,9 +30,6 @@ export const loadKZG = async () => {
      * @returns 0 if loaded successfully or 1 otherwise
      */
     const loadTrustedSetup = (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
-        if (trustedSetup === undefined) {
-            trustedSetup = mainnetTrustedSetup
-        }
         return loadTrustedSetupWasm(trustedSetup.g1, trustedSetup.n1, trustedSetup.g2, trustedSetup.n2)
     }
     
@@ -98,6 +95,8 @@ export const loadKZG = async () => {
         const res = verifyKzgProofWasm(commitment, z, y, proof)
         return res === 'true'
     }
+
+    loadTrustedSetup(trustedSetup)
 
     return {
         loadTrustedSetup, freeTrustedSetup, blobToKzgCommitment, computeBlobKzgProof, verifyBlobKzgProofBatch, verifyKzgProof, verifyBlobKzgProof
