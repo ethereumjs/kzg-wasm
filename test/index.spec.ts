@@ -7,13 +7,16 @@ const FIELD_ELEMENTS_PER_BLOB = 32
 const BYTES_PER_BLOB = BYTES_PER_FIELD_ELEMENT * FIELD_ELEMENTS_PER_BLOB
 
 describe('kzg initialization', () => {
+  let kzg
+  beforeAll(async () => {
+    kzg = await loadKZG()
+  })
+
   it('should initialize', async () => {
-    const kzg = await loadKZG()
     assert.typeOf(kzg.computeBlobKzgProof, 'function' , 'initialized KZG object')
     kzg.freeTrustedSetup()
   })
-  it('should return nonzero when invalid trusted setup is provided', async () => {
-      const kzg = await loadKZG()
+  it('should return nonzero when invalid trusted setup is provided', () => {
       const res = kzg.loadTrustedSetup({ g1: 'x12', n1: -1, g2: 'bad coordinates', n2: 0})
       assert.notOk(res === 0)
   })
@@ -23,7 +26,6 @@ describe('kzg API tests', () => {
   let kzg
   beforeAll(async () => {
     kzg = await loadKZG()
-    await kzg.loadTrustedSetup()
   })
 
   it('should generate kzg commitments and verify proofs', async () => {
