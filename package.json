@@ -7,7 +7,7 @@
     "build:ts": "scripts/ts-build.sh",
     "transpileCJS": "rm dist/cjs/kzg.js && babel src/kzg.js -d dist/cjs",
     "fixRequire": "sed -i.bak \"s/\\_require('url')/require('url')/g\" dist/cjs/kzg.js && rm dist/cjs/kzg.js.bak",
-    "fixWasmDir": "sed -i.bak 's#kzg.wasm#../wasm/kzg.wasm#g' src/kzg.js && rm src/kzg.js.bak",
+    "fixWasmDir": "sed -i.bak 's#kzg.wasm#../wasm/kzg.wasm#g' src/kzg.js && rm src/kzg.js.bak && sed -i.bak 's#kzg.wasm#../wasm/kzg.wasm#g' browser/kzg.js && rm src/kzg.js.bak",
     "clean": "rm -rf dist && rm -rf node_modules",
     "test": "vitest run test/*",
     "test:browser": "npx vitest run -c vitest.config.browser.ts test/*",
