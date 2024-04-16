@@ -89,7 +89,23 @@ EOT
     echo "\n";
 }
 
+build_web() {
+    blue "[Web build] "
+
+    echo "Adding dist/browser"
+    if ! [ -d ./dist/browser ];
+    then
+        mkdir ./dist/browser
+    fi
+    blue "Copying build files "
+    cp ./dist/esm/* ./dist/browser
+    cp ./browser/kzg.js ./dist/browser/kzg.js
+    green "DONE"
+    echo "\n"
+}
+
 # Begin build process.
 copy_wasm
 build_node
 build_esm
+build_web
