@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitest/config'
 import wasm from 'vite-plugin-wasm'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 const config = defineConfig({
   test: {
@@ -9,16 +8,15 @@ const config = defineConfig({
       name: 'chrome',
       headless: true,
     },
-  },
-  resolve: {
-    alias: {
-      events: "false"
-    },
+    alias: [
+      { find: "events" , replacement: "false"} ,
+      { find: './kzg.js', replacement: '../browser/kzg.js'}
+    ],
   },
   plugins: [
-    nodePolyfills({
-      include: ['util', 'fs', 'buffer'],
-    }),
+    // nodePolyfills({
+    //   include: ['util', 'fs', 'buffer'],
+    // }),
     wasm()
   ],
 })
