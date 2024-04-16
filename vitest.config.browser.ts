@@ -14,9 +14,6 @@ const config = defineConfig({
     ],
   },
   plugins: [
-    // nodePolyfills({
-    //   include: ['util', 'fs', 'buffer'],
-    // }),
     wasm()
   ],
 })
