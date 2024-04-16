@@ -3,9 +3,8 @@
   "version": "0.3.1",
   "description": "a WASM compilation of c-kzg-4844",
   "scripts": {
-    "build": "npm run build:ts && npm run build:web && npm run transpileCJS && npm run fixRequire",
+    "build": "npm run build:ts && npm run transpileCJS && npm run fixRequire",
     "build:ts": "scripts/ts-build.sh",
-    "build:web": "mkdir dist/browser && cp dist/esm/* dist/browser && cp browser/kzg.js dist/browser/kzg.js",
     "transpileCJS": "rm dist/cjs/kzg.js && babel src/kzg.js -d dist/cjs",
     "fixRequire": "sed -i.bak \"s/\\_require('url')/require('url')/g\" dist/cjs/kzg.js && rm dist/cjs/kzg.js.bak",
     "fixWasmDir": "sed -i.bak 's#kzg.wasm#../wasm/kzg.wasm#g' src/kzg.js && rm src/kzg.js.bak",
@@ -20,11 +19,11 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
       "browser": {
         "import": "./dist/browser/index.js"
-      }
+      },
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     }    
   },
   "license": "MIT",
