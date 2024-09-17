@@ -13,12 +13,12 @@ describe('kzg initialization', () => {
   })
 
   it('should initialize', async () => {
-    assert.typeOf(kzg.computeBlobKzgProof, 'function' , 'initialized KZG object')
+    assert.typeOf(kzg.computeBlobKzgProof, 'function', 'initialized KZG object')
     kzg.freeTrustedSetup()
   })
   it('should return nonzero when invalid trusted setup is provided', () => {
-      const res = kzg.loadTrustedSetup({ g1: 'x12', n1: -1, g2: 'bad coordinates', n2: 0})
-      assert.notOk(res === 0)
+    const res = kzg.loadTrustedSetup({ g1: 'x12', n1: -1, g2: 'bad coordinates', n2: 0 })
+    assert.notOk(res === 0)
   })
 })
 
