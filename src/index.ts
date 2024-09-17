@@ -22,7 +22,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
     const blobToKzgCommitmentWasm = module.cwrap('blob_to_kzg_commitment_wasm', 'string', ['array']) as (blob: Uint8Array) => string
     const computeBlobKzgProofWasm = module.cwrap('compute_blob_kzg_proof_wasm', 'string', ['array', 'array']) as (blob: Uint8Array, commitment: Uint8Array) => string
     const verifyBlobKzgProofWasm = module.cwrap('verify_blob_kzg_proof_wasm', 'string', ['array', 'array', 'array']) as (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => string
-    const verifyKzgProofWasm = module.cwrap('verify_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array']) 
+    const verifyKzgProofWasm = module.cwrap('verify_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array']) as (commitment: Uint8Array, z: Uint8Array, y: Uint8Array, proof: Uint8Array) => string
 
     /**
      * 
@@ -38,8 +38,8 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
      * @param blob - a blob of data formatted as a flattened Uint8Array of 4096 big endian KZG field elements
      * @returns a KZG commitment corresponding to the input blob formatted as a 48 byte Uint8Array
      */
-    const blobToKzgCommitment = (blob: Uint8Array) => {
-        const blobHex = '0x' + blobToKzgCommitmentWasm(blob)
+    const blobToKzgCommitment = (blob: string) => {
+        const blobHex = '0x' + blobToKzgCommitmentWasm(hexToBytes(blob))
         return hexToBytes(blobHex)
     }
 
@@ -47,11 +47,11 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
      * 
      * @param blob  - a blob of data formatted as a flattened Uint8Array of 4096 big endian KZG field elements
      * @param commitment - a KZG commitment corresponding to a blob formatted as a 48 byte Uint8Array
-     * @returns a 48 byte KZG proof corresponding to the blob and KZG commitment
+     * @returns a 48 byte KZG proof as prefixed hex string corresponding to the blob and KZG commitment
      */
-    const computeBlobKzgProof = (blob: Uint8Array, commitment: Uint8Array) => {
-        const proofHex = '0x' + computeBlobKzgProofWasm(blob, commitment)
-        return hexToBytes(proofHex)
+    const computeBlobKzgProof = (blob: string, commitment: string) => {
+        const proofHex = '0x' + computeBlobKzgProofWasm(hexToBytes(blob), hexToBytes(commitment))
+        return proofHex
     }
 
     /**
@@ -61,12 +61,12 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
      * @param proofs - an array of corresponding KZG proofs
      * @returns returns true if all proofs are verified against their blobs and commitments; false otherise
      */
-    const verifyBlobKzgProofBatch = (blobs: Uint8Array[], commitments: Uint8Array[], proofs: Uint8Array[]) => {
+    const verifyBlobKzgProofBatch = (blobs: string[], commitments: string[], proofs: string[]) => {
         if (blobs.length !== commitments.length && commitments.length !== proofs.length) {
             throw new Error('number of blobs, commitments, and proofs, must match')
         }
         for (let x = 0; x < blobs.length; x++) {
-            const res = verifyBlobKzgProofWasm(blobs[x], commitments[x], proofs[x])
+            const res = verifyBlobKzgProofWasm(hexToBytes(blobs[x]), hexToBytes(commitments[x]), hexToBytes(proofs[x]))
             if (res !== 'true') return false
         }
         return true
@@ -79,8 +79,8 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
      * @param proof - a 48 byte KZG proof corresponding to the blob and commitment
      * @returns true if proof is verified; false otherwise
      */
-    const verifyBlobKzgProof = (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => {
-        const res = verifyBlobKzgProofWasm(blob, commitment, proof)
+    const verifyBlobKzgProof = (blob: string, commitment: string, proof: string) => {
+        const res = verifyBlobKzgProofWasm(hexToBytes(blob), hexToBytes(commitment), hexToBytes(proof))
         return res === 'true'
     }
     /**
@@ -91,8 +91,8 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
      * @param proof 
      * @returns true if proof is verified; false otherwise
      */
-    const verifyKzgProof = (commitment: Uint8Array, z: Uint8Array, y: Uint8Array, proof: Uint8Array) => {
-        const res = verifyKzgProofWasm(commitment, z, y, proof)
+    const verifyKzgProof = (commitment: string, z: string, y: string, proof: string) => {
+        const res = verifyKzgProofWasm(hexToBytes(commitment), hexToBytes(z), hexToBytes(y), hexToBytes(proof))
         return res === 'true'
     }
 
