@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 (modification: no type change headlines) and this project adheres to 
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 0.4.0 - 2024-04-16
+
+- Add browser specific build and corresponding updates to exports map in package.json, PR [#11](https://github.com/ethereumjs/kzg-wasm/pull/11)
+
 ## 0.3.1 - 2024-03-14
 
 - Add optional trusted setup parameter to `loadKZG`, PR [#9](https://github.com/ethereumjs/kzg-wasm/pull/9)
