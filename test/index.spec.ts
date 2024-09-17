@@ -33,10 +33,10 @@ describe('kzg API tests', () => {
     blob[0] = 0x01
     blob[1] = 0x02
     const commitment = kzg.blobToKzgCommitment(bytesToHex(blob))
-    assert.equal(bytesToHex(commitment).slice(2), 'ab87358a111c3cd9da8aadf4b414e9f6be5ac83d923fb70d8d27fef1e2690b4cad015b23b8c058881da78a05c62b1173')
-    const proof = kzg.computeBlobKzgProof(bytesToHex(blob), bytesToHex(commitment))
+    assert.equal(commitment.slice(2).toLowerCase(), 'ab87358a111c3cd9da8aadf4b414e9f6be5ac83d923fb70d8d27fef1e2690b4cad015b23b8c058881da78a05c62b1173')
+    const proof = kzg.computeBlobKzgProof(bytesToHex(blob), (commitment))
     assert.equal(proof.toLowerCase(), '0x8dd951edb4e0df1779c29d28b835a2cc8b26ebf69a38d7d9afadd0eb8a4cbffd9db1025fd253e91e00a9904f109e81e3')
-    const proofVerified = kzg.verifyBlobKzgProofBatch([bytesToHex(blob)], [bytesToHex(commitment)], [proof])
+    const proofVerified = kzg.verifyBlobKzgProofBatch([bytesToHex(blob)], [(commitment)], [proof])
     assert.equal(proofVerified, true)
   })
 

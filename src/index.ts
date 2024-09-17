@@ -40,7 +40,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
      */
     const blobToKzgCommitment = (blob: string) => {
         const blobHex = '0x' + blobToKzgCommitmentWasm(hexToBytes(blob))
-        return hexToBytes(blobHex)
+        return blobHex
     }
 
     /**
