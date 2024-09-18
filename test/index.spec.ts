@@ -13,7 +13,7 @@ describe('kzg initialization', () => {
   })
 
   it('should initialize', async () => {
-    assert.typeOf(kzg.computeBlobKzgProof, 'function', 'initialized KZG object')
+    assert.typeOf(kzg.computeBlobKZGProof, 'function', 'initialized KZG object')
     kzg.freeTrustedSetup()
   })
   it('should return nonzero when invalid trusted setup is provided', () => {
@@ -32,11 +32,11 @@ describe('kzg API tests', () => {
     const blob = new Uint8Array(BYTES_PER_BLOB)
     blob[0] = 0x01
     blob[1] = 0x02
-    const commitment = kzg.blobToKzgCommitment(bytesToHex(blob))
+    const commitment = kzg.blobToKZGCommitment(bytesToHex(blob))
     assert.equal(commitment.slice(2).toLowerCase(), 'ab87358a111c3cd9da8aadf4b414e9f6be5ac83d923fb70d8d27fef1e2690b4cad015b23b8c058881da78a05c62b1173')
-    const proof = kzg.computeBlobKzgProof(bytesToHex(blob), (commitment))
+    const proof = kzg.computeBlobKZGProof(bytesToHex(blob), (commitment))
     assert.equal(proof.toLowerCase(), '0x8dd951edb4e0df1779c29d28b835a2cc8b26ebf69a38d7d9afadd0eb8a4cbffd9db1025fd253e91e00a9904f109e81e3')
-    const proofVerified = kzg.verifyBlobKzgProofBatch([bytesToHex(blob)], [(commitment)], [proof])
+    const proofVerified = kzg.verifyBlobKZGProofBatch([bytesToHex(blob)], [(commitment)], [proof])
     assert.equal(proofVerified, true)
   })
 
@@ -56,7 +56,7 @@ describe('kzg API tests', () => {
       ),
     }
 
-    const verifiedKzgProof = kzg.verifyKzgProof(precompileData.Commitment, precompileData.z, precompileData.y, precompileData.Proof)
+    const verifiedKzgProof = kzg.verifyKZGProof(precompileData.Commitment, precompileData.z, precompileData.y, precompileData.Proof)
     assert.equal(verifiedKzgProof, true)
   })
 })
