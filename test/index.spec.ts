@@ -56,7 +56,7 @@ describe('kzg API tests', () => {
       ),
     }
 
-    const verifiedKzgProof = kzg.verifyKZGProof(precompileData.Commitment, precompileData.z, precompileData.y, precompileData.Proof)
-    assert.equal(verifiedKzgProof, true)
+    const verifiedKZGProof = kzg.verifyKZGProof(precompileData.Commitment, precompileData.z, precompileData.y, precompileData.Proof)
+    assert.equal(verifiedKZGProof, true)
   })
 })
