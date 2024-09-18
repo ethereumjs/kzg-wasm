@@ -6,7 +6,7 @@ This library is produced by building the original C code to WASM using the [`emp
 
 ## Usage
 
-This module exposes a single export, an async function called `loadKZG` which loads and compiles the WASM object, loads a trusted setup (defaults to the official setup from the KZG ceremony) and returns an object that exposes the API defined in the `KZG` type interface in [`@ethereum/util`](https://github.com/ethereumjs/ethereumjs-monorepo/blob/e1221c98f3be0ba4224416f10d91ed4aa50130d8/packages/util/src/kzg.ts#L4)
+This module exposes a single export, an async function called `loadKZG` which loads and compiles the WASM object, loads a trusted setup (defaults to the official setup from the KZG ceremony) and returns an object that exposes the API defined in the `KZG` type interface in `@ethereumjs/util`
 
 To use with the `@ethereumjs` libraries, do the following:
 

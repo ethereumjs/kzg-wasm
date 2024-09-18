@@ -35,8 +35,8 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
     
     /**
      * 
-     * @param blob - a blob of data formatted as a flattened Uint8Array of 4096 big endian KZG field elements
-     * @returns a KZG commitment corresponding to the input blob formatted as a 48 byte Uint8Array
+     * @param blob - a blob of data formatted as prefixed hex string containing 4096 big endian KZG field elements
+     * @returns a KZG commitment corresponding to the input blob formatted as a 48 byte prefixed hex string
      */
     const blobToKZGCommitment = (blob: string) => {
         const blobHex = '0x' + blobToKZGCommitmentWasm(hexToBytes(blob))
@@ -45,8 +45,8 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
 
     /**
      * 
-     * @param blob  - a blob of data formatted as a flattened Uint8Array of 4096 big endian KZG field elements
-     * @param commitment - a KZG commitment corresponding to a blob formatted as a 48 byte Uint8Array
+     * @param blob  - a blob of data formatted as a flattened prefixed hex string of 4096 big endian KZG field elements
+     * @param commitment - a KZG commitment corresponding to a blob formatted as a 48 byte prefixed hex string
      * @returns a 48 byte KZG proof as prefixed hex string corresponding to the blob and KZG commitment
      */
     const computeBlobKZGProof = (blob: string, commitment: string) => {
@@ -74,9 +74,9 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
 
     /**
      * 
-     * @param blob - a blob of data formatted as a flattened Uint8Array of 4096 big endian KZG field elements
-     * @param commitment - a 48 byte KZG commitment corresponding to the blob
-     * @param proof - a 48 byte KZG proof corresponding to the blob and commitment
+     * @param blob - a blob of data formatted as a flattened prefixed hex string of 4096 big endian KZG field elements
+     * @param commitment - a 48 byte KZG commitment corresponding to the blob formatted as a prefixed hex string
+     * @param proof - a 48 byte KZG proof corresponding to the blob and commitment formatted as a prefixed hex string
      * @returns true if proof is verified; false otherwise
      */
     const verifyBlobKZGProof = (blob: string, commitment: string, proof: string) => {
