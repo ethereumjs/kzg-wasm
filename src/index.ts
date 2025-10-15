@@ -2,10 +2,12 @@ import { hexToBytes } from './util.js'
 import kzgWasm from './kzg.js'
 import mainnetTrustedSetup from './trustedSetup.js'
 export type TrustedSetup = {
-    g1: string
-    g2: string
-    n1: number  // bytes per element
-    n2: number  // 65
+    g1_monomial: string
+    g1_monomial_size: number 
+    g1_lagrange: string
+    g1_lagrange_size: number 
+    g2_monomial: string
+    g2_monomial_size: number 
 }
 /**
  * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
@@ -15,32 +17,37 @@ export type TrustedSetup = {
  * @returns object - the KZG methods required for all 4844 related operations
  */
 export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
-    const module = await kzgWasm()
+    const module = await kzgWasm();
 
-    const loadTrustedSetupWasm = module.cwrap('load_trusted_setup_from_wasm', 'number', ['string', 'number','string', 'number']) as (g1: string, n1: number, g2: string, n2: number) => number
-    const freeTrustedSetup = module.cwrap('free_trusted_setup_wasm', null, []) as () => void
-    const blobToKZGCommitmentWasm = module.cwrap('blob_to_kzg_commitment_wasm', 'string', ['array']) as (blob: Uint8Array) => string
-    const computeBlobKZGProofWasm = module.cwrap('compute_blob_kzg_proof_wasm', 'string', ['array', 'array']) as (blob: Uint8Array, commitment: Uint8Array) => string
-    const verifyBlobKZGProofWasm = module.cwrap('verify_blob_kzg_proof_wasm', 'string', ['array', 'array', 'array']) as (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => string
-    const verifyKZGProofWasm = module.cwrap('verify_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array']) as (commitment: Uint8Array, z: Uint8Array, y: Uint8Array, proof: Uint8Array) => string
-
+    const loadTrustedSetupWasm = module.cwrap('load_trusted_setup_wasm', 'number', ['string', 'number','string', 'number', 'string', 'number', 'number']) as (g1Monomial: string, g1MonomialSize: number, g1Lagrange: string, g1LagrangeSize: number,  g2Monomial: string, g2MonomialSize: number, precompute: number) => number;
+    const freeTrustedSetup = module.cwrap('free_trusted_setup_wasm', null, []) as () => void;
+    const blobToKZGCommitmentWasm = module.cwrap('blob_to_kzg_commitment_wasm', 'string', ['array']) as (blob: Uint8Array) => string;
+    const computeBlobKZGProofWasm = module.cwrap('compute_blob_kzg_proof_wasm', 'string', ['array', 'array']) as (blob: Uint8Array, commitment: Uint8Array) => string;
+    const verifyBlobKZGProofWasm = module.cwrap('verify_blob_kzg_proof_wasm', 'string', ['array', 'array', 'array']) as (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => string;
+    const verifyKZGProofWasm = module.cwrap('verify_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array']) as (commitment: Uint8Array, z: Uint8Array, y: Uint8Array, proof: Uint8Array) => string;
+    const computeCellsAndKZGProofsWasm = module.cwrap('compute_cells_and_kzg_proofs_wasm', 'string', ['array']) as (blob: Uint8Array) => string;
+    const recoverCellsFromKZGProofsWasm = module.cwrap('recover_cells_and_kzg_proofs_wasm', 'string', ['array', 'array', 'number']) as (cellIndices: number[], cells: Uint8Array[], numCells: number) => string;
+    const verifyCellKZGProofWasm = module.cwrap('verify_cell_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array', 'number']) as (commitmentsBytes: Uint8Array[], cellIndices: number[], cells: Uint8Array[], proofBytes: Uint8Array[], numCells: number) => string;
     /**
      * 
      * @param trustedSetup - an optional trusted setup parameter provided by the user
      * @returns 0 if loaded successfully or 1 otherwise
      */
     const loadTrustedSetup = (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
-        return loadTrustedSetupWasm(trustedSetup.g1, trustedSetup.n1, trustedSetup.g2, trustedSetup.n2)
+        return loadTrustedSetupWasm(trustedSetup.g1_monomial, trustedSetup.g1_monomial_size, trustedSetup.g1_lagrange, trustedSetup.g1_lagrange_size, trustedSetup.g2_monomial, trustedSetup.g2_monomial_size, 8);
     }
     
     /**
-     * 
+     * Converts a blob of data into a KZG commitment.
      * @param blob - a blob of data formatted as prefixed hex string containing 4096 big endian KZG field elements
      * @returns a KZG commitment corresponding to the input blob formatted as a 48 byte prefixed hex string
      */
     const blobToKZGCommitment = (blob: string) => {
-        const blobHex = '0x' + blobToKZGCommitmentWasm(hexToBytes(blob))
-        return blobHex
+        const result = blobToKZGCommitmentWasm(hexToBytes(blob))
+        if (result === "invalid argument" || result === "unable to allocate memory" || result === "internal error") {
+            throw new Error(result);
+        }
+        return '0x' + result;
     }
 
     /**
@@ -50,8 +57,11 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
      * @returns a 48 byte KZG proof as prefixed hex string corresponding to the blob and KZG commitment
      */
     const computeBlobKZGProof = (blob: string, commitment: string) => {
-        const proofHex = '0x' + computeBlobKZGProofWasm(hexToBytes(blob), hexToBytes(commitment))
-        return proofHex
+        const result = computeBlobKZGProofWasm(hexToBytes(blob), hexToBytes(commitment));
+        if (result === "invalid argument" || result === "unable to allocate memory" || result === "internal error") {
+            throw new Error(result);
+        }
+        return '0x' + result;
     }
 
     /**
@@ -96,10 +106,44 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         return res === 'true'
     }
 
+    const computeCellsAndKZGProofs = (blob: string) => {
+        const result = computeCellsAndKZGProofsWasm(hexToBytes(blob))
+        if (result === "invalid argument" || result === "unable to allocate memory" || result === "internal error") {
+            throw new Error(result);
+        }
+        const resultHex = '0x' + result;
+        return resultHex;
+    }
+
+    const recoverCellsFromKZGProofs = (cellIndices: number[], cells: string[], numCells: number) => {
+        const cellsBytes = cells.map((c) => hexToBytes(c));
+        const result = recoverCellsFromKZGProofsWasm(cellIndices, cellsBytes, numCells);
+        if (result === "invalid argument" || result === "unable to allocate memory" || result === "internal error") {
+            throw new Error(result);
+        }
+        const resultHex = '0x' + result;
+        return resultHex;
+    }
+
+    const verifyCellKZGProof = (commitments: string[], cellIndices: number[], cells: string[], proofs: string[], numCells: number) => {
+        if (commitments.length !== cellIndices.length && cellIndices.length !== cells.length && cells.length !== proofs.length) {
+            throw new Error('number of commitments, cell indices, cells, and proofs must match')
+        }
+        if (cells.length !== numCells) {
+            throw new Error('numCells must match the number of cells provided')
+        }
+        const commitmentsBytes = commitments.map((c) => hexToBytes(c));
+        const cellsBytes = cells.map((c) => hexToBytes(c));
+        const proofBytes = proofs.map((p) => hexToBytes(p));
+        const res = verifyCellKZGProofWasm(commitmentsBytes, cellIndices, cellsBytes, proofBytes, numCells)
+        return res === 'true'
+    }
+
     loadTrustedSetup(trustedSetup)
 
     return {
-        loadTrustedSetup, freeTrustedSetup, blobToKZGCommitment, computeBlobKZGProof, verifyBlobKZGProofBatch, verifyKZGProof, verifyBlobKZGProof
+        loadTrustedSetup, freeTrustedSetup, blobToKZGCommitment, computeBlobKZGProof, verifyBlobKZGProofBatch, verifyKZGProof, verifyBlobKZGProof,
+        computeCellsAndKZGProofs, recoverCellsFromKZGProofs, verifyCellKZGProof
     }
 }
 
