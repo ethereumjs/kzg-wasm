@@ -1,8 +1,6 @@
 import { hexToBytes } from './util.js'
 import kzgWasm from './kzg.js'
 import mainnetTrustedSetup from './trustedSetup.js'
-import { resolve } from 'path'
-import { readFileSync } from 'fs'
 export type TrustedSetup = {
     g1_monomial: string
     g1_lagrange: string
@@ -10,15 +8,18 @@ export type TrustedSetup = {
 }
 /**
  * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
- * 
+ *
  * @param trustedSetup Optional trusted setup, otherwise official KZG setup from the KZG ceremony is used
- * 
+ *
  * @returns object - the KZG methods required for all 4844 related operations
  */
 export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
     // In Node.js environment, preload the WASM binary to avoid path resolution issues
     let wasmBinary: ArrayBuffer | undefined = undefined
-    if (typeof process !== 'undefined') {
+    if (typeof process !== 'undefined' && typeof process.cwd === 'function') {
+        // Dynamically import Node.js modules only when in Node.js environment
+        const { resolve } = await import('path')
+        const { readFileSync } = await import('fs')
         const wasmPath = resolve(process.cwd(), 'wasm/kzg.wasm')
         const buffer = readFileSync(wasmPath)
         // Convert Node.js Buffer to ArrayBuffer
