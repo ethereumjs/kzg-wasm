@@ -41,7 +41,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
     const verifyBlobKZGProofWasm = module.cwrap('verify_blob_kzg_proof_wasm', 'string', ['array', 'array', 'array']) as (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => string;
     const verifyKZGProofWasm = module.cwrap('verify_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array']) as (commitment: Uint8Array, z: Uint8Array, y: Uint8Array, proof: Uint8Array) => string;
     const computeCellsAndKZGProofsWasm = module.cwrap('compute_cells_and_kzg_proofs_wasm', 'string', ['array']) as (blob: Uint8Array) => string;
-    const recoverCellsFromKZGProofsWasm = module.cwrap('recover_cells_and_kzg_proofs_wasm', 'string', ['array', 'array', 'number']) as (cellIndices: number[], cells: Uint8Array[], numCells: number) => string;
+    const recoverCellsFromKZGProofsWasm = module.cwrap('recover_cells_and_kzg_proofs_wasm', 'string', ['array', 'array', 'number']) as (cellIndices: Uint8Array, cells: Uint8Array, numCells: number) => string;
     const verifyCellKZGProofWasm = module.cwrap('verify_cell_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array', 'number']) as (commitmentsBytes: Uint8Array[], cellIndices: number[], cells: Uint8Array[], proofBytes: Uint8Array[], numCells: number) => string;
     /**
      * 
@@ -145,7 +145,21 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
 
     const recoverCellsFromKZGProofs = (cellIndices: number[], cells: string[], numCells: number) => {
         const cellsBytes = cells.map((c) => hexToBytes(c));
-        const result = recoverCellsFromKZGProofsWasm(cellIndices, cellsBytes, numCells);
+        // Flatten cells array into a single contiguous Uint8Array
+        const flatCells = new Uint8Array(numCells * 2048); // Each cell is 2048 bytes
+        for (let i = 0; i < numCells; i++) {
+            flatCells.set(cellsBytes[i], i * 2048);
+        }
+        // Convert cell indices to a byte array representing uint64_t values (8 bytes each, little-endian)
+        const cellIndicesBytes = new Uint8Array(numCells * 8);
+        const view = new DataView(cellIndicesBytes.buffer);
+        for (let i = 0; i < numCells; i++) {
+            // Write as little-endian 64-bit unsigned integer
+            // Since our values fit in 32 bits, we only need to set the low 32 bits
+            view.setUint32(i * 8, cellIndices[i], true); // true = little-endian
+            view.setUint32(i * 8 + 4, 0, true); // high 32 bits = 0
+        }
+        const result = recoverCellsFromKZGProofsWasm(cellIndicesBytes, flatCells, numCells);
         if (result === "invalid argument" || result === "unable to allocate memory" || result === "internal error") {
             throw new Error(result);
         }
