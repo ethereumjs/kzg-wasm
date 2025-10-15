@@ -1,6 +1,8 @@
 import { hexToBytes } from './util.js'
 import kzgWasm from './kzg.js'
 import mainnetTrustedSetup from './trustedSetup.js'
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
 export type TrustedSetup = {
     g1_monomial: string
     g1_monomial_size: number 
@@ -17,7 +19,22 @@ export type TrustedSetup = {
  * @returns object - the KZG methods required for all 4844 related operations
  */
 export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
-    const module = await kzgWasm();
+    const module = await kzgWasm({
+        locateFile: (path: string) => {
+            console.log('locateFile', path)
+            // Convert file:// URLs to regular paths for Node.js
+            if (path.startsWith('file://')) {
+                console.log({path})
+                return fileURLToPath(path)
+            }
+            // Handle relative paths in Node.js environment
+            if (typeof process !== 'undefined' && path === '../wasm/kzg.wasm') {
+                // Resolve to the wasm directory in the project root
+                return "file://" + resolve(process.cwd(), 'wasm/kzg.wasm')
+            }
+            return path
+        }
+    });
 
     const loadTrustedSetupWasm = module.cwrap('load_trusted_setup_wasm', 'number', ['string', 'number','string', 'number', 'string', 'number', 'number']) as (g1Monomial: string, g1MonomialSize: number, g1Lagrange: string, g1LagrangeSize: number,  g2Monomial: string, g2MonomialSize: number, precompute: number) => number;
     const freeTrustedSetup = module.cwrap('free_trusted_setup_wasm', null, []) as () => void;
@@ -26,7 +43,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
     const verifyBlobKZGProofWasm = module.cwrap('verify_blob_kzg_proof_wasm', 'string', ['array', 'array', 'array']) as (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => string;
     const verifyKZGProofWasm = module.cwrap('verify_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array']) as (commitment: Uint8Array, z: Uint8Array, y: Uint8Array, proof: Uint8Array) => string;
     const computeCellsAndKZGProofsWasm = module.cwrap('compute_cells_and_kzg_proofs_wasm', 'string', ['array']) as (blob: Uint8Array) => string;
-    const recoverCellsFromKZGProofsWasm = module.cwrap('recover_cells_and_kzg_proofs_wasm', 'string', ['array', 'array', 'number']) as (cellIndices: number[], cells: Uint8Array[], numCells: number) => string;
+    const recoverCellsFromKZGProofsWasm = module.cwrap('recover_cells_and_kzg_proofs_wasm', 'string', ['a2rray', 'array', 'number']) as (cellIndices: number[], cells: Uint8Array[], numCells: number) => string;
     const verifyCellKZGProofWasm = module.cwrap('verify_cell_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array', 'number']) as (commitmentsBytes: Uint8Array[], cellIndices: number[], cells: Uint8Array[], proofBytes: Uint8Array[], numCells: number) => string;
     /**
      * 

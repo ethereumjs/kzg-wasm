@@ -3,11 +3,11 @@
   "version": "2.1.5",
   "description": "a WASM compilation of c-kzg-4844",
   "scripts": {
-    "build": "npm run build:ts && npm run transpileCJS && npm run fixRequire && npm run fixWasmDirInNode",
+    "build": "npm run build:ts && npm run transpileCJS && npm run fixRequire ",
     "build:ts": "scripts/ts-build.sh",
     "transpileCJS": "rm dist/cjs/kzg.js && babel src/kzg.js -d dist/cjs",
     "fixRequire": "sed -i.bak \"s/\\_require('url')/require('url')/g\" dist/cjs/kzg.js && rm dist/cjs/kzg.js.bak",
-    "fixWasmDirInNode": "sed -i.bak 's#kzg-node.wasm#../wasm/kzg.wasm#g' src/kzg.js && rm src/kzg.js.bak && sed -i.bak 's#kzg.wasm#../wasm/kzg.wasm#g' src/kzg.js && rm src/kzg.js.bak",
+    "fixWasmDirInNode": "sed -i.bak 's#kzg-node.wasm#kzg.wasm#g' src/kzg.js && rm src/kzg.js.bak && sed -i.bak 's#kzg.wasm#../wasm/kzg.wasm#g' src/kzg.js && rm src/kzg.js.bak",
     "fixWasmDirInWeb": "sed -i.bak 's#kzg.wasm#../wasm/kzg.wasm#g' browser/kzg.js && rm browser/kzg.js.bak",
     "clean": "rm -rf dist && rm -rf node_modules",
     "test": "vitest run test/*",
