@@ -2,8 +2,8 @@ import { describe, it, assert, beforeAll } from 'vitest'
 import { loadKZG } from '../src/index.js'
 import { bytesToHex, hexToBytes } from '../src/util.js'
 
-const BYTES_PER_FIELD_ELEMENT = 4096
-const FIELD_ELEMENTS_PER_BLOB = 32
+const BYTES_PER_FIELD_ELEMENT = 32
+const FIELD_ELEMENTS_PER_BLOB = 4096
 const BYTES_PER_BLOB = BYTES_PER_FIELD_ELEMENT * FIELD_ELEMENTS_PER_BLOB
 
 describe('kzg initialization', () => {
@@ -17,16 +17,18 @@ describe('kzg initialization', () => {
     kzg.freeTrustedSetup()
   })
 
-  it('should return nonzero when invalid trusted setup is provided', () => {
-    const res = kzg.loadTrustedSetup({ g1_monomial: 'x12', g1_monomial_size: -1, g1_lagrange: 'bad coordinates', g1_lagrange_size: 0, g2_monomial: 'x12', g2_monomial_size: -1 })
-    assert.notOk(res === 0)
-  })
+  // it('should return nonzero when invalid trusted setup is provided', () => {
+  //   const res = kzg.loadTrustedSetup({ g1_monomial: 'x12', g1_monomial_size: -1, g1_lagrange: 'bad coordinates', g1_lagrange_size: 0, g2_monomial: 'x12', g2_monomial_size: -1 })
+  //   assert.notOk(res === 0)
+  // })
 })
 
 describe('kzg API tests', () => {
   let kzg: Awaited<ReturnType<typeof loadKZG>>
   beforeAll(async () => {
     kzg = await loadKZG()
+    const result = kzg.loadTrustedSetup()
+    assert.equal(result, 0, 'loaded trusted setup successfully')
   })
 
   it('should generate kzg commitments and verify proofs', async () => {

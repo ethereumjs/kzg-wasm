@@ -5,11 +5,8 @@ import { resolve } from 'path'
 import { readFileSync } from 'fs'
 export type TrustedSetup = {
     g1_monomial: string
-    g1_monomial_size: number 
     g1_lagrange: string
-    g1_lagrange_size: number 
     g2_monomial: string
-    g2_monomial_size: number 
 }
 /**
  * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
@@ -36,23 +33,36 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         }
     });
 
-    const loadTrustedSetupWasm = module.cwrap('load_trusted_setup_wasm', 'number', ['string', 'number','string', 'number', 'string', 'number', 'number']) as (g1Monomial: string, g1MonomialSize: number, g1Lagrange: string, g1LagrangeSize: number,  g2Monomial: string, g2MonomialSize: number, precompute: number) => number;
+    const loadTrustedSetupWasm = module.cwrap('load_trusted_setup_wasm', 'number', ['array', 'array','array', 'number']) as (g1Monomial: Uint8Array,g1Lagrange: Uint8Array,  g2Monomial: Uint8Array, precompute: number) => number;
     const freeTrustedSetup = module.cwrap('free_trusted_setup_wasm', null, []) as () => void;
     const blobToKZGCommitmentWasm = module.cwrap('blob_to_kzg_commitment_wasm', 'string', ['array']) as (blob: Uint8Array) => string;
     const computeBlobKZGProofWasm = module.cwrap('compute_blob_kzg_proof_wasm', 'string', ['array', 'array']) as (blob: Uint8Array, commitment: Uint8Array) => string;
     const verifyBlobKZGProofWasm = module.cwrap('verify_blob_kzg_proof_wasm', 'string', ['array', 'array', 'array']) as (blob: Uint8Array, commitment: Uint8Array, proof: Uint8Array) => string;
     const verifyKZGProofWasm = module.cwrap('verify_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array']) as (commitment: Uint8Array, z: Uint8Array, y: Uint8Array, proof: Uint8Array) => string;
     const computeCellsAndKZGProofsWasm = module.cwrap('compute_cells_and_kzg_proofs_wasm', 'string', ['array']) as (blob: Uint8Array) => string;
-    const recoverCellsFromKZGProofsWasm = module.cwrap('recover_cells_and_kzg_proofs_wasm', 'string', ['a2rray', 'array', 'number']) as (cellIndices: number[], cells: Uint8Array[], numCells: number) => string;
+    const recoverCellsFromKZGProofsWasm = module.cwrap('recover_cells_and_kzg_proofs_wasm', 'string', ['array', 'array', 'number']) as (cellIndices: number[], cells: Uint8Array[], numCells: number) => string;
     const verifyCellKZGProofWasm = module.cwrap('verify_cell_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array', 'number']) as (commitmentsBytes: Uint8Array[], cellIndices: number[], cells: Uint8Array[], proofBytes: Uint8Array[], numCells: number) => string;
     /**
      * 
      * @param trustedSetup - an optional trusted setup parameter provided by the user
-     * @returns 0 if loaded successfully or 1 otherwise
+     * @returns 0 if loaded successfully or non zero otherwise
      */
     const loadTrustedSetup = (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
-        return loadTrustedSetupWasm(trustedSetup.g1_monomial, trustedSetup.g1_monomial_size, trustedSetup.g1_lagrange, trustedSetup.g1_lagrange_size, trustedSetup.g2_monomial, trustedSetup.g2_monomial_size, 8);
+        if(trustedSetup.g1_monomial.length != 48 * 4096 * 2) {
+            throw new Error(`trusted setup g1_monomial must be 48 * 4096  bytes long, not ${trustedSetup.g1_monomial.length}`)
+        }
+        if(trustedSetup.g1_lagrange.length != 48 * 4096 * 2) {
+            throw new Error(`trusted setup g1_lagrange must be 48 * 4096 bytes long, not ${trustedSetup.g1_lagrange.length}`)
+        }
+        if(trustedSetup.g2_monomial.length != 65 * 96 * 2) {
+            throw new Error(`trusted setup g2_monomial must be 65 * 96  bytes long, not ${trustedSetup.g2_monomial.length}`)
+        }
+        const g1Monomial = hexToBytes("0x" + trustedSetup.g1_monomial)
+        const g1Lagrange = hexToBytes("0x" + trustedSetup.g1_lagrange)
+        const g2Monomial = hexToBytes("0x" + trustedSetup.g2_monomial)
+        return loadTrustedSetupWasm(g1Monomial, g1Lagrange, g2Monomial, 8);
     }
+
     
     /**
      * Converts a blob of data into a KZG commitment.
@@ -156,7 +166,6 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         return res === 'true'
     }
 
-    loadTrustedSetup(trustedSetup)
 
     return {
         loadTrustedSetup, freeTrustedSetup, blobToKZGCommitment, computeBlobKZGProof, verifyBlobKZGProofBatch, verifyKZGProof, verifyBlobKZGProof,
