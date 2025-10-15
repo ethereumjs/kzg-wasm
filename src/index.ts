@@ -1,8 +1,8 @@
 import { hexToBytes } from './util.js'
 import kzgWasm from './kzg.js'
 import mainnetTrustedSetup from './trustedSetup.js'
-import { fileURLToPath } from 'url'
-import { dirname, resolve } from 'path'
+import { resolve } from 'path'
+import { readFileSync } from 'fs'
 export type TrustedSetup = {
     g1_monomial: string
     g1_monomial_size: number 
@@ -19,19 +19,19 @@ export type TrustedSetup = {
  * @returns object - the KZG methods required for all 4844 related operations
  */
 export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
+    // In Node.js environment, preload the WASM binary to avoid path resolution issues
+    let wasmBinary: ArrayBuffer | undefined = undefined
+    if (typeof process !== 'undefined') {
+        const wasmPath = resolve(process.cwd(), 'wasm/kzg.wasm')
+        const buffer = readFileSync(wasmPath)
+        // Convert Node.js Buffer to ArrayBuffer
+        wasmBinary = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+    }
+
     const module = await kzgWasm({
+        wasmBinary,
         locateFile: (path: string) => {
             console.log('locateFile', path)
-            // Convert file:// URLs to regular paths for Node.js
-            if (path.startsWith('file://')) {
-                console.log({path})
-                return fileURLToPath(path)
-            }
-            // Handle relative paths in Node.js environment
-            if (typeof process !== 'undefined' && path === '../wasm/kzg.wasm') {
-                // Resolve to the wasm directory in the project root
-                return "file://" + resolve(process.cwd(), 'wasm/kzg.wasm')
-            }
             return path
         }
     });
