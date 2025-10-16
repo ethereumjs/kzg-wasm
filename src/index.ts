@@ -92,6 +92,8 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         return '0x' + result;
     }
 
+    const blobToKzgCommitment = blobToKZGCommitment // Alias with different casing for ethereumjs compatibility
+
     /**
      * 
      * @param blob  - a blob of data formatted as a flattened prefixed hex string of 4096 big endian KZG field elements
@@ -300,7 +302,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
 
     return {
         loadTrustedSetup, freeTrustedSetup, blobToKZGCommitment, computeBlobKZGProof, verifyBlobKZGProofBatch, verifyKZGProof, verifyBlobKZGProof,
-        computeCellsAndKZGProofs, recoverCellsFromKZGProofs, verifyCellKZGProof, verifyCellKZGProofBatch
+        computeCellsAndKZGProofs, recoverCellsFromKZGProofs, verifyCellKZGProof, verifyCellKZGProofBatch, blobToKzgCommitment
     }
 }
 
