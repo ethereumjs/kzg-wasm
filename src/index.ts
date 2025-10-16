@@ -108,6 +108,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         return '0x' + result;
     }
 
+    const computeBlobProof = computeBlobKZGProof // Alias with different casing for ethereumjs compatibility
     /**
      * 
      * @param blobs - an array of blobs
@@ -302,7 +303,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
 
     return {
         loadTrustedSetup, freeTrustedSetup, blobToKZGCommitment, computeBlobKZGProof, verifyBlobKZGProofBatch, verifyKZGProof, verifyBlobKZGProof,
-        computeCellsAndKZGProofs, recoverCellsFromKZGProofs, verifyCellKZGProof, verifyCellKZGProofBatch, blobToKzgCommitment
+        computeCellsAndKZGProofs, recoverCellsFromKZGProofs, verifyCellKZGProof, verifyCellKZGProofBatch, blobToKzgCommitment, computeBlobProof
     }
 }
 
