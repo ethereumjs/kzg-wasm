@@ -61,7 +61,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
      * @param trustedSetup - an optional trusted setup parameter provided by the user
      * @returns 0 if loaded successfully or non zero otherwise
      */
-    const loadTrustedSetup = (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
+    const loadTrustedSetup = (trustedSetup: TrustedSetup = mainnetTrustedSetup, precompute: number = 8) => {
         if(trustedSetup.g1_monomial.length != 48 * 4096 * 2) {
             throw new Error(`trusted setup g1_monomial must be 48 * 4096  bytes long, not ${trustedSetup.g1_monomial.length}`)
         }
@@ -74,7 +74,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         const g1Monomial = hexToBytes("0x" + trustedSetup.g1_monomial)
         const g1Lagrange = hexToBytes("0x" + trustedSetup.g1_lagrange)
         const g2Monomial = hexToBytes("0x" + trustedSetup.g2_monomial)
-        return loadTrustedSetupWasm(g1Monomial, g1Lagrange, g2Monomial, 8);
+        return loadTrustedSetupWasm(g1Monomial, g1Lagrange, g2Monomial, precompute);
     }
 
     
@@ -183,22 +183,31 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
      * @returns 
      */
     const recoverCellsFromKZGProofs = (cellIndices: number[], partial_cells: string[], numCells: number):KZGProofWithCells  => {
+
+        const cellIndicesFlat = new Uint8Array(numCells * 8);
+        for (let i = 0; i < numCells; i++) {
+            if (cellIndices[i] < 0 || cellIndices[i] >= CELLS_PER_EXT_BLOB) {
+                throw new Error(`cell index ${cellIndices[i]} at position ${i} is out of range [0, ${CELLS_PER_EXT_BLOB})`);
+            }
+            cellIndicesFlat[i * 8] = cellIndices[i] & 0xFF;
+            cellIndicesFlat[i * 8 + 1] = (cellIndices[i] >> 8) & 0xFF;
+            cellIndicesFlat[i * 8 + 2] = (cellIndices[i] >> 16) & 0xFF;
+            cellIndicesFlat[i * 8 + 3] = (cellIndices[i] >> 24) & 0xFF;
+            // High 4 bytes are zero
+            cellIndicesFlat[i * 8 + 4] = 0;
+            cellIndicesFlat[i * 8 + 5] = 0;
+            cellIndicesFlat[i * 8 + 6] = 0;
+            cellIndicesFlat[i * 8 + 7] = 0;
+        }
+
         const cellsBytes = partial_cells.map((c) => hexToBytes(c));
         // Flatten cells array into a single contiguous Uint8Array
-        const flatCells = new Uint8Array(numCells * 2048); // Each cell is 2048 bytes
+        const flatCells = new Uint8Array(numCells * BYTES_PER_CELL); // Each cell is 2048 bytes
         for (let i = 0; i < numCells; i++) {
-            flatCells.set(cellsBytes[i], i * 2048);
+            flatCells.set(cellsBytes[i], i * BYTES_PER_CELL);
         }
-        // Convert cell indices to a byte array representing uint64_t values (8 bytes each, little-endian)
-        const cellIndicesBytes = new Uint8Array(numCells * 8);
-        const view = new DataView(cellIndicesBytes.buffer);
-        for (let i = 0; i < numCells; i++) {
-            // Write as little-endian 64-bit unsigned integer
-            // Since our values fit in 32 bits, we only need to set the low 32 bits
-            view.setUint32(i * 8, cellIndices[i], true); // true = little-endian
-            view.setUint32(i * 8 + 4, 0, true); // high 32 bits = 0
-        }
-        const result = recoverCellsFromKZGProofsWasm(cellIndicesBytes, flatCells, numCells);
+
+        const result = recoverCellsFromKZGProofsWasm(cellIndicesFlat, flatCells, numCells);
         if (result === "invalid argument" || result === "unable to allocate memory" || result === "internal error") {
             throw new Error(result);
         }
