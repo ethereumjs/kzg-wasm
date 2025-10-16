@@ -6,6 +6,19 @@ export type TrustedSetup = {
     g1_lagrange: string
     g2_monomial: string
 }
+
+// KZGProofWithCells type represents a KZG proof along with its associated cells
+export type KZGProofWithCells = {
+    proof: string
+    cells: string[]
+}
+
+/**
+ * C code constants
+ */
+const CELLS_PER_EXT_BLOB = 128
+const BYTES_PER_CELL = 2048
+
 /**
  * Initialization function that instantiates WASM code and returns an object matching the `KZG` interface exposed by `@ethereumjs/util`
  *
@@ -134,17 +147,38 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         return res === 'true'
     }
 
-    const computeCellsAndKZGProofs = (blob: string) => {
+    const computeCellsAndKZGProofs = (blob: string): KZGProofWithCells => {
         const result = computeCellsAndKZGProofsWasm(hexToBytes(blob))
         if (result === "invalid argument" || result === "unable to allocate memory" || result === "internal error") {
             throw new Error(result);
         }
-        const resultHex = '0x' + result;
-        return resultHex;
+        // Proof is 48 bytes, each cell is 2048 bytes and there are 128 cells. Multiplied by 2 for hex representation
+        if (result.length != 2 * (48 + (CELLS_PER_EXT_BLOB * BYTES_PER_CELL))) {
+            // Likely an unhandled error
+            throw new Error(`Failed to compute cells and KZG proofs: ${result}`);
+        }
+        const proof = '0x' + result.slice(0, 96);
+        const cells: string[] = [];
+        for (let i = 0; i < CELLS_PER_EXT_BLOB; i++) {
+            const cellHex = '0x' + result.slice(96 + (i * BYTES_PER_CELL * 2), 96 + ((i + 1) * BYTES_PER_CELL * 2));
+            cells.push(cellHex);
+        }
+
+        return {
+            proof,
+            cells
+        };
     }
 
-    const recoverCellsFromKZGProofs = (cellIndices: number[], cells: string[], numCells: number) => {
-        const cellsBytes = cells.map((c) => hexToBytes(c));
+    /**
+     * 
+     * @param cellIndices The original indexes of each partial cell if they were in a complete list of cells
+     * @param partial_cells The partial cells from which to recover all of the cells (must be atleast 50% of total cells)
+     * @param numCells The length of partial_cells
+     * @returns 
+     */
+    const recoverCellsFromKZGProofs = (cellIndices: number[], partial_cells: string[], numCells: number):KZGProofWithCells  => {
+        const cellsBytes = partial_cells.map((c) => hexToBytes(c));
         // Flatten cells array into a single contiguous Uint8Array
         const flatCells = new Uint8Array(numCells * 2048); // Each cell is 2048 bytes
         for (let i = 0; i < numCells; i++) {
@@ -163,8 +197,21 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         if (result === "invalid argument" || result === "unable to allocate memory" || result === "internal error") {
             throw new Error(result);
         }
-        const resultHex = '0x' + result;
-        return resultHex;
+        // Proof is 48 bytes, each cell is 2048 bytes and there are 128 cells. Multiplied by 2 for hex representation
+        if (result.length != 2 * (48 + (CELLS_PER_EXT_BLOB * BYTES_PER_CELL))) {
+            // Likely an unhandled error
+            throw new Error(`Failed to compute cells and KZG proofs: ${result}`);
+        }
+        const proof = '0x' + result.slice(0, 96);
+        const cells: string[] = [];
+        for (let i = 0; i < CELLS_PER_EXT_BLOB; i++) {
+            const cellHex = '0x' + result.slice(96 + (i * BYTES_PER_CELL * 2), 96 + ((i + 1) * BYTES_PER_CELL * 2));
+            cells.push(cellHex);
+        }
+        return {
+            proof,
+            cells
+        };
     }
 
     const verifyCellKZGProof = (commitments: string[], cellIndices: number[], cells: string[], proofs: string[], numCells: number) => {
