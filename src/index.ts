@@ -9,14 +9,15 @@ export type TrustedSetup = {
 
 // KZGProofWithCells type represents a KZG proof along with its associated cells
 export type KZGProofWithCells = {
-    proof: string // Will always be 48 bytes
-    cells: string[] // Will always contain 128 cells
+    proofs: string[] // Will always be of size 128 with 48 bytes each
+    cells: string[] // Will always contain 128 cells with 2048 bytes each
 }
 
 /**
  * C code constants
  */
 const CELLS_PER_EXT_BLOB = 128
+const PROOF_SIZE_BYTES = 48
 const BYTES_PER_CELL = 2048
 
 /**
@@ -42,7 +43,6 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
     const module = await kzgWasm({
         wasmBinary,
         locateFile: (path: string) => {
-            console.log('locateFile', path)
             return path
         }
     });
@@ -153,19 +153,24 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
             throw new Error(result);
         }
         // Proof is 48 bytes, each cell is 2048 bytes and there are 128 cells. Multiplied by 2 for hex representation
-        if (result.length != 2 * (48 + (CELLS_PER_EXT_BLOB * BYTES_PER_CELL))) {
+        if (result.length != 2 * ((PROOF_SIZE_BYTES*CELLS_PER_EXT_BLOB) + (CELLS_PER_EXT_BLOB * BYTES_PER_CELL))) {
             // Likely an unhandled error
             throw new Error(`Failed to compute cells and KZG proofs: ${result}`);
         }
-        const proof = '0x' + result.slice(0, 96);
-        const cells: string[] = [];
+        const proofs: string[]  = [];
         for (let i = 0; i < CELLS_PER_EXT_BLOB; i++) {
-            const cellHex = '0x' + result.slice(96 + (i * BYTES_PER_CELL * 2), 96 + ((i + 1) * BYTES_PER_CELL * 2));
+            const proofHex = '0x' + result.slice(i * PROOF_SIZE_BYTES * 2, (i + 1) * PROOF_SIZE_BYTES * 2);
+            proofs.push(proofHex);
+        }
+        const cells: string[] = [];
+        const proofs_offset = (PROOF_SIZE_BYTES * CELLS_PER_EXT_BLOB) * 2;
+        for (let i = 0; i < CELLS_PER_EXT_BLOB; i++) {
+            const cellHex = '0x' + result.slice((proofs_offset + (i * BYTES_PER_CELL * 2)), (proofs_offset + ((i + 1) * BYTES_PER_CELL * 2)));
             cells.push(cellHex);
         }
 
         return {
-            proof,
+            proofs,
             cells
         };
     }
@@ -197,19 +202,25 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         if (result === "invalid argument" || result === "unable to allocate memory" || result === "internal error") {
             throw new Error(result);
         }
-        // Proof is 48 bytes, each cell is 2048 bytes and there are 128 cells. Multiplied by 2 for hex representation
-        if (result.length != 2 * (48 + (CELLS_PER_EXT_BLOB * BYTES_PER_CELL))) {
+        // Proof is 48 * 128 bytes, each cell is 2048 bytes and there are 128 cells. Multiplied by 2 for hex representation
+        if (result.length != 2 * ((PROOF_SIZE_BYTES*CELLS_PER_EXT_BLOB) + (CELLS_PER_EXT_BLOB * BYTES_PER_CELL))) {
             // Likely an unhandled error
             throw new Error(`Failed to recover cells and KZG proofs: ${result}`);
         }
-        const proof = '0x' + result.slice(0, 96);
-        const cells: string[] = [];
+        const proofs: string[]  = [];
         for (let i = 0; i < CELLS_PER_EXT_BLOB; i++) {
-            const cellHex = '0x' + result.slice(96 + (i * BYTES_PER_CELL * 2), 96 + ((i + 1) * BYTES_PER_CELL * 2));
+            const proofHex = '0x' + result.slice(i * PROOF_SIZE_BYTES * 2, (i + 1) * PROOF_SIZE_BYTES * 2);
+            proofs.push(proofHex);
+        }
+        const cells: string[] = [];
+         const proofs_offset = (PROOF_SIZE_BYTES * CELLS_PER_EXT_BLOB) * 2;
+        for (let i = 0; i < CELLS_PER_EXT_BLOB; i++) {
+            const cellHex = '0x' + result.slice((proofs_offset + (i * BYTES_PER_CELL * 2)), (proofs_offset + ((i + 1) * BYTES_PER_CELL * 2)));
             cells.push(cellHex);
         }
+
         return {
-            proof,
+            proofs,
             cells
         };
     }
