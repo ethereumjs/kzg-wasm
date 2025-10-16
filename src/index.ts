@@ -34,7 +34,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         // Dynamically import Node.js modules only when in Node.js environment
         const { resolve } = await import('path')
         const { readFileSync } = await import('fs')
-        const wasmPath = resolve(process.cwd(), 'wasm/kzg.wasm')
+        const wasmPath = resolve(__dirname, '../wasm/kzg.wasm')
         const buffer = readFileSync(wasmPath)
         // Convert Node.js Buffer to ArrayBuffer
         wasmBinary = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
