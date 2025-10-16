@@ -9,8 +9,8 @@ export type TrustedSetup = {
 
 // KZGProofWithCells type represents a KZG proof along with its associated cells
 export type KZGProofWithCells = {
-    proof: string
-    cells: string[]
+    proof: string // Will always be 48 bytes
+    cells: string[] // Will always contain 128 cells
 }
 
 /**
