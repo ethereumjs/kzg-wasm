@@ -1,6 +1,6 @@
 {
   "name": "kzg-wasm",
-  "version": "2.1.5",
+  "version": "1.0.0",
   "description": "a WASM compilation of c-kzg-4844",
   "scripts": {
     "build": "npm run build:ts && npm run transpileCJS && npm run fixRequire ",

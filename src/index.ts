@@ -55,7 +55,8 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
     const verifyKZGProofWasm = module.cwrap('verify_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array']) as (commitment: Uint8Array, z: Uint8Array, y: Uint8Array, proof: Uint8Array) => string;
     const computeCellsAndKZGProofsWasm = module.cwrap('compute_cells_and_kzg_proofs_wasm', 'string', ['array']) as (blob: Uint8Array) => string;
     const recoverCellsFromKZGProofsWasm = module.cwrap('recover_cells_and_kzg_proofs_wasm', 'string', ['array', 'array', 'number']) as (cellIndices: Uint8Array, cells: Uint8Array, numCells: number) => string;
-    const verifyCellKZGProofWasm = module.cwrap('verify_cell_kzg_proof_wasm', 'string', ['array', 'array', 'array', 'array', 'number']) as (commitmentsBytes: Uint8Array[], cellIndices: number[], cells: Uint8Array[], proofBytes: Uint8Array[], numCells: number) => string;
+    const verifyCellKZGProofWasm = module.cwrap('verify_cell_kzg_proof_wasm', 'string', ['array', 'array', 'array']) as (commitment: Uint8Array,  cellsBytes: Uint8Array, proofBytes: Uint8Array) => string;
+    const verifyCellKZGProofBatchWasm = module.cwrap('verify_cell_kzg_proof_batch_wasm', 'string', ['array', 'array', 'array', 'array', 'number']) as (commitmentsBytes: Uint8Array, cellIndices: Uint8Array, cells: Uint8Array, proofBytes: Uint8Array, numCells: number) => string;
     /**
      * 
      * @param trustedSetup - an optional trusted setup parameter provided by the user
@@ -233,8 +234,24 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
             cells
         };
     }
+    const verifyCellKZGProof = (commitment: string, cells: string[], proofs: string[]) => {
+        const cellsBytes = cells.map((c) => hexToBytes(c));
+        const proofBytes = proofs.map((p) => hexToBytes(p));
 
-    const verifyCellKZGProof = (commitments: string[], cellIndices: number[], cells: string[], proofs: string[], numCells: number) => {
+        const cellsBytesFlat = new Uint8Array(cells.length * BYTES_PER_CELL); // Each cell is 2048 bytes
+        for (let i = 0; i < cells.length; i++) {
+            cellsBytesFlat.set(cellsBytes[i], i * BYTES_PER_CELL);
+        }
+
+        const proofBytesFlat = new Uint8Array(proofBytes.length * PROOF_SIZE_BYTES); // Each proof is 48 bytes
+        for (let i = 0; i < proofs.length; i++) {
+            proofBytesFlat.set(proofBytes[i], i * PROOF_SIZE_BYTES);
+        }
+        const res = verifyCellKZGProofWasm(hexToBytes(commitment), cellsBytesFlat, proofBytesFlat)
+        return res === 'true'
+    }
+
+    const verifyCellKZGProofBatch = (commitments: string[], cellIndices: number[], cells: string[], proofs: string[], numCells: number) => {
         if (commitments.length !== cellIndices.length && cellIndices.length !== cells.length && cells.length !== proofs.length) {
             throw new Error('number of commitments, cell indices, cells, and proofs must match')
         }
@@ -244,14 +261,46 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         const commitmentsBytes = commitments.map((c) => hexToBytes(c));
         const cellsBytes = cells.map((c) => hexToBytes(c));
         const proofBytes = proofs.map((p) => hexToBytes(p));
-        const res = verifyCellKZGProofWasm(commitmentsBytes, cellIndices, cellsBytes, proofBytes, numCells)
+
+        const commitmentsBytesFlat = new Uint8Array(commitments.length * 48); // Each cell is 48 bytes
+        for (let i = 0; i < numCells; i++) {
+            commitmentsBytesFlat.set(commitmentsBytes[i], i * 48);
+        }
+
+        const cellIndicesFlat = new Uint8Array(numCells * 8);
+        for (let i = 0; i < numCells; i++) {
+            if (cellIndices[i] < 0 || cellIndices[i] >= CELLS_PER_EXT_BLOB) {
+                throw new Error(`cell index ${cellIndices[i]} at position ${i} is out of range [0, ${CELLS_PER_EXT_BLOB})`);
+            }
+            cellIndicesFlat[i * 8] = cellIndices[i] & 0xFF;
+            cellIndicesFlat[i * 8 + 1] = (cellIndices[i] >> 8) & 0xFF;
+            cellIndicesFlat[i * 8 + 2] = (cellIndices[i] >> 16) & 0xFF;
+            cellIndicesFlat[i * 8 + 3] = (cellIndices[i] >> 24) & 0xFF;
+            // High 4 bytes are zero
+            cellIndicesFlat[i * 8 + 4] = 0;
+            cellIndicesFlat[i * 8 + 5] = 0;
+            cellIndicesFlat[i * 8 + 6] = 0;
+            cellIndicesFlat[i * 8 + 7] = 0;
+        }
+
+        const cellsBytesFlat = new Uint8Array(cells.length * BYTES_PER_CELL); // Each cell is 2048 bytes
+        for (let i = 0; i < numCells; i++) {
+            cellsBytesFlat.set(cellsBytes[i], i * BYTES_PER_CELL);
+        }
+
+        const proofBytesFlat = new Uint8Array(proofBytes.length * PROOF_SIZE_BYTES); // Each proof is 48 bytes
+        for (let i = 0; i < numCells; i++) {
+            proofBytesFlat.set(proofBytes[i], i * PROOF_SIZE_BYTES);
+        }
+
+        const res = verifyCellKZGProofBatchWasm(commitmentsBytesFlat, cellIndicesFlat, cellsBytesFlat, proofBytesFlat, numCells)
         return res === 'true'
     }
 
 
     return {
         loadTrustedSetup, freeTrustedSetup, blobToKZGCommitment, computeBlobKZGProof, verifyBlobKZGProofBatch, verifyKZGProof, verifyBlobKZGProof,
-        computeCellsAndKZGProofs, recoverCellsFromKZGProofs, verifyCellKZGProof
+        computeCellsAndKZGProofs, recoverCellsFromKZGProofs, verifyCellKZGProof, verifyCellKZGProofBatch
     }
 }
 

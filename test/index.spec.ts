@@ -149,4 +149,52 @@ describe('kzg API tests', () => {
     }
   })
 
+  it('should verify the KZG proof (batch)', async () => {
+    // Create a test blob with random-like data
+    const blob = new Uint8Array(BYTES_PER_BLOB)
+    blob[0] = 0x01
+    blob[1] = 0x02
+    const blobHex = bytesToHex(blob)
+
+    // Compute cells and proofs for the original blob
+    const originalCellsAndProofs = kzg.computeCellsAndKZGProofs(blobHex)
+
+    const commitment = kzg.blobToKZGCommitment(blobHex)
+    const cellIndices: number[] = []
+    const commitments: string[] = []
+    for (let i = 0; i < CELLS_PER_EXT_BLOB; i++) {
+        commitments.push(commitment)
+        cellIndices.push(i)
+    }
+
+    // Verify we got the expected number of cells and proofs
+    assert.equal(originalCellsAndProofs.cells.length, CELLS_PER_EXT_BLOB)
+    assert.equal(originalCellsAndProofs.proofs.length, CELLS_PER_EXT_BLOB)
+
+    const result = kzg.verifyCellKZGProofBatch(commitments, cellIndices, originalCellsAndProofs.cells, originalCellsAndProofs.proofs, CELLS_PER_EXT_BLOB)
+
+    assert.equal(result, true)
+
+  
+  })
+
+   it('should verify the KZG proof', async () => {
+    // Create a test blob with random-like data
+    const blob = new Uint8Array(BYTES_PER_BLOB)
+    blob[0] = 0x01
+    blob[1] = 0x02
+    const blobHex = bytesToHex(blob)
+
+    // Compute cells and proofs for the original blob
+    const originalCellsAndProofs = kzg.computeCellsAndKZGProofs(blobHex)
+
+    const commitment = kzg.blobToKZGCommitment(blobHex)
+
+
+    const result = kzg.verifyCellKZGProof(commitment,  originalCellsAndProofs.cells, originalCellsAndProofs.proofs)
+
+    assert.equal(result, true)
+
+  
+  })
 })
