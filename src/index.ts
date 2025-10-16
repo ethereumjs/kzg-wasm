@@ -200,7 +200,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) 
         // Proof is 48 bytes, each cell is 2048 bytes and there are 128 cells. Multiplied by 2 for hex representation
         if (result.length != 2 * (48 + (CELLS_PER_EXT_BLOB * BYTES_PER_CELL))) {
             // Likely an unhandled error
-            throw new Error(`Failed to compute cells and KZG proofs: ${result}`);
+            throw new Error(`Failed to recover cells and KZG proofs: ${result}`);
         }
         const proof = '0x' + result.slice(0, 96);
         const cells: string[] = [];
