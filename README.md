@@ -1,7 +1,5 @@
 # KZG-WASM
 
-Fork of the original [kzg-wasm](https://github.com/ethereumjs/kzg-wasm) with support for EIP 7594 
-
 This module implements a JS wrapper around a WASM compilation of the [`c-kzg-4844`](https://github.com/ethereum/c-kzg-4844) C library built for use with EIP-4844.
 
 This library is produced by building the original C code to WASM using the [`empscripten`](https://empscripten.org) toolchain in [this fork](https://github.com/ETHCF/c-kzg-4844) of `c-kzg-4844`.

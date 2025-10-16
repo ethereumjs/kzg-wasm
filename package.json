@@ -1,5 +1,5 @@
 {
-  "name": "@blobkit/kzg-wasm",
+  "name": "kzg-wasm",
   "version": "2.1.5",
   "description": "a WASM compilation of c-kzg-4844",
   "scripts": {
