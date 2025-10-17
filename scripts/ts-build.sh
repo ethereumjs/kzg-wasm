@@ -86,6 +86,18 @@ EOT
         npx tsc --build ./tsconfig.esm.json
         sed -i.bak 's#./loader.mjs#./loader.cjs#g' src/index.ts
         rm ./src/index.ts.bak
+        cat <<EOT >> ./dist/esm/kzg.js.tmp
+import { createRequire } from 'node:module';
+import { dirname } from "path";
+import { fileURLToPath } from 'url';
+
+const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+EOT
+        cat ./dist/esm/kzg.js >> ./dist/esm/kzg.js.tmp
+        mv ./dist/esm/kzg.js.tmp ./dist/esm/kzg.js
         green "DONE"
     else
         echo "Skipping ESM build (no config available)."
