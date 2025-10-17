@@ -78,10 +78,14 @@ build_esm() {
     "type": "module"
 }
 EOT
+        sed -i.bak 's#./loader.cjs#./loader.mjs#g' src/index.ts
+        
         echo "> tsc --build ./tsconfig.esm.json"
         printf "${BLUE}[ESM build] Working... "
 
         npx tsc --build ./tsconfig.esm.json
+        sed -i.bak 's#./loader.mjs#./loader.cjs#g' src/index.ts
+        rm ./src/index.ts.bak
         green "DONE"
     else
         echo "Skipping ESM build (no config available)."

@@ -1,4 +1,5 @@
 import { hexToBytes } from './util.js'
+import { loadWasmModule } from './loader.cjs'
 import kzgWasm from './kzg.js'
 import mainnetTrustedSetup from './trustedSetup.js'
 export type TrustedSetup = {
@@ -29,16 +30,7 @@ const BYTES_PER_CELL = 2048
  */
 export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
     // In Node.js environment, preload the WASM binary to avoid path resolution issues
-    let wasmBinary: ArrayBuffer | undefined = undefined
-    if (typeof process !== 'undefined' && typeof process.cwd === 'function') {
-        // Dynamically import Node.js modules only when in Node.js environment
-        const { resolve } = await import('path')
-        const { readFileSync } = await import('fs')
-        const wasmPath = resolve(__dirname, '../wasm/kzg.wasm')
-        const buffer = readFileSync(wasmPath)
-        // Convert Node.js Buffer to ArrayBuffer
-        wasmBinary = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
-    }
+    let wasmBinary = await loadWasmModule();
 
     const module = await kzgWasm({
         wasmBinary,
