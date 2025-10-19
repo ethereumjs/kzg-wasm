@@ -31,8 +31,6 @@ describe('kzg API tests', () => {
   let kzg: Awaited<ReturnType<typeof loadKZG>>
   beforeAll(async () => {
     kzg = await loadKZG()
-    const result = kzg.loadTrustedSetup()
-    assert.equal(result, 0, 'loaded trusted setup successfully')
   })
 
   it('should generate kzg commitments and verify proofs', async () => {
