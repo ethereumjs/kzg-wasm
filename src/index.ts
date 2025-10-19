@@ -85,7 +85,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup, 
         return '0x' + result;
     }
 
-    const blobToKzgCommitment = blobToKZGCommitment // Alias with different casing for ethereumjs compatibility
+    
 
     /**
      * 
@@ -101,7 +101,7 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup, 
         return '0x' + result;
     }
 
-    const computeBlobProof = computeBlobKZGProof // Alias with different casing for ethereumjs compatibility
+   
     /**
      * 
      * @param blobs - an array of blobs
@@ -297,9 +297,40 @@ export const loadKZG = async (trustedSetup: TrustedSetup = mainnetTrustedSetup, 
     if (loadResult !== 0) {
         throw new Error(`Failed to load trusted setup, error code: ${loadResult}`);
     }
+
+
+    // ALIASING
+    const computeBlobProof = computeBlobKZGProof // Alias with different casing for ethereumjs compatibility
+    const blobToKzgCommitment = blobToKZGCommitment // Alias with different casing for ethereumjs compatibility
+    const verifyProof = verifyKZGProof // Alias with different casing for ethereumjs compatibility
+
+    const verifyCellKzgProofBatch = (commitments: string[], cellIndices: number[], cells: string[], proofs: string[]) => {
+        return verifyCellKZGProofBatch(commitments, cellIndices, cells, proofs, cells.length)
+    }
+
+    const recoverCellsAndProofs = (indices: number[], cells: string[]): [string[], string[]] => {
+        const result = recoverCellsFromKZGProofs(indices, cells, cells.length);
+        return [result.cells, result.proofs];
+    }
+
+    const computeCells = (blob: string): string[] => {
+        const result = computeCellsAndKZGProofs(blob);
+        return result.cells;
+    }
+
+    const computeCellsAndProofs = (blob: string): [string[], string[]] => {
+        const result = computeCellsAndKZGProofs(blob);
+        return [result.cells, result.proofs];
+    }
+
+    const verifyBlobProofBatch = verifyBlobKZGProofBatch
+
     return {
         loadTrustedSetup, freeTrustedSetup, blobToKZGCommitment, computeBlobKZGProof, verifyBlobKZGProofBatch, verifyKZGProof, verifyBlobKZGProof,
-        computeCellsAndKZGProofs, recoverCellsFromKZGProofs, verifyCellKZGProof, verifyCellKZGProofBatch, blobToKzgCommitment, computeBlobProof
+        computeCellsAndKZGProofs, recoverCellsFromKZGProofs, verifyCellKZGProof, verifyCellKZGProofBatch, 
+        // ALIASED/KZGJS COMPATIBILITY METHODS
+        verifyCellKzgProofBatch, recoverCellsAndProofs, computeCells, computeCellsAndProofs, verifyBlobProofBatch, 
+        computeBlobProof, blobToKzgCommitment, verifyProof
     }
 }
 
