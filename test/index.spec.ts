@@ -10,7 +10,7 @@ const BYTES_PER_CELL = 2048
 const BYTES_PER_G1 = 48
 
 describe('kzg initialization', () => {
-  let kzg: any
+  let kzg: Awaited<ReturnType<typeof loadKZG>>
   beforeAll(async () => {
     kzg = await loadKZG()
   })
@@ -22,7 +22,7 @@ describe('kzg initialization', () => {
 
   it('should throw when invalid trusted setup is provided', () => {
     assert.throws(() => {
-      kzg.loadTrustedSetup({ g1_monomial: 'x12',  g1_lagrange: 'bad coordinates', g2_monomial: 'x12'})
+      kzg.loadTrustedSetup(8, { g1_monomial: 'x12',  g1_lagrange: 'bad coordinates', g2_monomial: 'x12'})
     })
   })
 })
