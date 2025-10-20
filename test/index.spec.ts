@@ -22,7 +22,7 @@ describe('kzg initialization', () => {
 
   it('should throw when invalid trusted setup is provided', () => {
     assert.throws(() => {
-      kzg.loadTrustedSetup(8, { g1_monomial: 'x12',  g1_lagrange: 'bad coordinates', g2_monomial: 'x12'})
+      kzg.loadTrustedSetup(0, { g1_monomial: 'x12',  g1_lagrange: 'bad coordinates', g2_monomial: 'x12'})
     })
   })
 })

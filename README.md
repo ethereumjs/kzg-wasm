@@ -35,7 +35,7 @@ The `loadKZG()` function returns an object that implements the KZG interface wit
 
 #### `loadTrustedSetup(trustedSetup?, precompute?)`
 ```ts
-loadTrustedSetup(trustedSetup: TrustedSetup = mainnetTrustedSetup, precompute: number = 8): number
+loadTrustedSetup(trustedSetup: TrustedSetup = mainnetTrustedSetup, precompute: number = 0): number
 ```
 Loads a trusted setup for KZG operations. Returns 0 on success, non-zero on failure.
 

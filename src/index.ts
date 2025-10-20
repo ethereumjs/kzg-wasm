@@ -29,7 +29,7 @@ const BYTES_PER_CELL = 2048
  *
  * @returns object - the KZG methods required for all 4844 related operations
  */
-export const loadKZG = async (precompute: number = 8, trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
+export const loadKZG = async (precompute: number = 0, trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
     // In Node.js environment, preload the WASM binary to avoid path resolution issues
     let wasmBinary = await loadWasmModule();
 
@@ -55,7 +55,7 @@ export const loadKZG = async (precompute: number = 8, trustedSetup: TrustedSetup
      * @param trustedSetup - an optional trusted setup parameter provided by the user
      * @returns 0 if loaded successfully or non zero otherwise
      */
-    const loadTrustedSetup = (precompute: number = 8, trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
+    const loadTrustedSetup = (precompute: number = 0, trustedSetup: TrustedSetup = mainnetTrustedSetup) => {
         if(trustedSetup.g1_monomial.length != 48 * 4096 * 2) {
             throw new Error(`trusted setup g1_monomial must be 48 * 4096  bytes long, not ${trustedSetup.g1_monomial.length}`)
         }
