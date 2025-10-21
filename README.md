@@ -126,3 +126,87 @@ type KZGProofWithCells = {
     cells: string[]  // Array of 128 cells, each 2048 bytes
 }
 ```
+
+## Development
+
+### Build Process
+
+This section outlines the build scripts included in this repository to create distributable JavaScript/TypeScript packages from the WASM compilation.
+
+#### Prerequisites
+
+Ensure you have the following installed:
+- **Node.js** (v16+)
+- **npm** 
+- **TypeScript** (installed as dev dependency)
+- **Babel** (installed as dev dependency)
+
+#### Build Scripts Overview
+
+The repository includes the following build scripts:
+
+1. **`build`** - Main build command
+2. **`build:ts`** - TypeScript compilation to multiple targets
+3. **`transpileCJS`** - Babel transpilation for CommonJS compatibility
+4. **`fixRequire`** - Fix dynamic require statements
+5. **`fixWasmDirInNode`** - Fix WASM paths for Node.js builds
+6. **`fixWasmDirInWeb`** - Fix WASM paths for browser builds
+
+#### Script Details
+
+**`build:ts`** (`scripts/ts-build.sh`)
+- Copies WASM file to `dist/wasm/`
+- Compiles TypeScript to CommonJS (`dist/cjs/`)
+- Compiles TypeScript to ESM (`dist/esm/`)
+- Creates browser build (`dist/browser/`)
+
+**`transpileCJS`**
+- Uses Babel to transpile `src/kzg.js` to `dist/cjs/`
+- Ensures CommonJS compatibility
+
+**`fixRequire`**
+- Fixes dynamic require statements in CommonJS build
+- Replaces `\_require('url')` with `require('url')`
+
+**`fixWasmDirInNode`**
+- Updates WASM file paths in Node.js builds
+- Changes `kzg-node.wasm` → `kzg.wasm` → `../wasm/kzg.wasm`
+
+**`fixWasmDirInWeb`**
+- Updates WASM file paths in browser builds
+- Changes `kzg-web.wasm` → `../wasm/kzg.wasm`
+
+#### Build Output Structure
+
+```
+dist/
+├── cjs/           # CommonJS build for Node.js
+│   ├── index.js
+│   ├── kzg.js
+│   ├── loader.cjs
+│   └── package.json
+├── esm/           # ES Modules build
+│   ├── index.js
+│   ├── kzg.js
+│   ├── loader.mjs
+│   └── package.json
+├── browser/       # Browser build
+│   ├── index.js
+│   ├── kzg.js
+│   └── package.json
+└── wasm/          # WASM binary
+    └── kzg.wasm
+```
+
+#### Testing Builds
+
+```bash
+# Test all builds
+npm test
+
+# Test specific builds
+npm run test:dist    # Test distribution build
+npm run test:src     # Test source code
+npm run test:browser # Test browser environment
+```
+
