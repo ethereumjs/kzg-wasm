@@ -1,6 +1,13 @@
 import { describe, it, assert, beforeAll } from 'vitest'
-import { loadKZG } from '../src/index.js'
-import { bytesToHex, hexToBytes } from '../src/util.js'
+import { bytesToHex } from '../src/util.js'
+
+// Conditional imports based on TYPE environment variable
+const TYPE = process.env.TYPE || 'SRC'
+
+// Dynamic imports based on TYPE
+const { loadKZG } = TYPE === 'SRC' 
+  ? await import('../src/index.js')
+  : await import('../dist/esm/index.js')
 
 const BYTES_PER_FIELD_ELEMENT = 32
 const FIELD_ELEMENTS_PER_BLOB = 4096
