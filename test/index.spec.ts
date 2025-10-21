@@ -2,7 +2,7 @@ import { describe, it, assert, beforeAll } from 'vitest'
 import { bytesToHex } from '../src/util.js'
 
 // Conditional imports based on TYPE environment variable
-const TYPE = process.env.TYPE || 'SRC'
+const TYPE = (typeof process !== 'undefined' && process.env?.TYPE) || 'SRC'
 
 // Dynamic imports based on TYPE
 const { loadKZG } = TYPE === 'SRC' 
