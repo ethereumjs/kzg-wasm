@@ -32,16 +32,19 @@
   "license": "MIT",
   "devDependencies": {
     "@babel/cli": "^7.23.9",
-    "@babel/core": "^7.23.9",
-    "@babel/preset-env": "^7.23.9",
-    "@vitest/browser": "^3.2.4",
-    "@vitest/utils": "^3.2.4",
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "7.28.5",
+    "@vitest/browser": "^4.0.6",
+    "@vitest/utils": "^4.0.6",
     "babel-plugin-transform-import-meta": "^2.2.1",
     "prettier": "^3.2.5",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",
-    "vite-plugin-wasm": "^3.3.0",
-    "vitest": "^3.2.4",
+    "vite-plugin-wasm": "^3.5.0",
+    "vitest": "^4.0.6",
     "webdriverio": "^9.20.0"
+  },
+  "dependencies": {
+    "@vitest/browser-webdriverio": "^4.0.6"
   }
 }

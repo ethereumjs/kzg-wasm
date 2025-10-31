@@ -33,11 +33,14 @@ export const loadKZG = async (precompute: number = 0, trustedSetup: TrustedSetup
     // In Node.js environment, preload the WASM binary to avoid path resolution issues
     let wasmBinary = await loadWasmModule();
 
+
+    const locateFile = wasmBinary? (path: string) => {
+            return path
+        } : undefined
+
     const module = await kzgWasm({
         wasmBinary,
-        locateFile: (path: string) => {
-            return path
-        }
+        locateFile,
     });
 
     const loadTrustedSetupWasm = module.cwrap('load_trusted_setup_wasm', 'number', ['array', 'array','array', 'number']) as (g1Monomial: Uint8Array,g1Lagrange: Uint8Array,  g2Monomial: Uint8Array, precompute: number) => number;
