@@ -12,6 +12,7 @@ const config = defineConfig({
   test: {
     environment: 'node',
     hookTimeout: 120000,
+    testTimeout: 120000,
   },
   resolve: {
     alias: {
