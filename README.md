@@ -156,6 +156,8 @@ WASM KZG: 12.233333333333333 ms per verify proof
 JS KZG: 28.333333333333332 ms per verify proof
 ```
 
+Generally note that initialization of this library is pretty slow due to the large KZG setup, so it is likely only worth to use in long-running production contexts.
+
 ## Development
 
 ### Build Process
