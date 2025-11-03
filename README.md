@@ -1,8 +1,24 @@
 # KZG-WASM
 
+| WASM wrapper library for KZG/EIP-4844/PeerDAS functionality. |
+| ------------------------------------------------------------ |
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Usage](#usage)
+- [API Reference](#api-reference)
+- [Performance Comparison](#performance-comparison)
+- [Development](#development)
+- [License](#license)
+
+## Introduction
+
 This module implements a JS wrapper around a WASM compilation of the [`c-kzg-4844`](https://github.com/ethereum/c-kzg-4844) C library built for use with EIP-4844. Starting with v1.0.0, the library also support cell-based operations in the context of EIP-7594 (PeerDAS).
 
 This library is produced by building the original C code to WASM using the [`empscripten`](https://empscripten.org) toolchain in [this fork](https://github.com/ETHCF/c-kzg-4844) of `c-kzg-4844`.
+
+If you are looking for a pure JS implementation of KZG/EIP-4844/PeerDAS functionality, check out the [`micro-eth-signer`](https://github.com/paulmillr/micro-eth-signer) library. For a comparison on how these libraries roughly compare in terms of performance, see the [Performance Comparison](#performance-comparison) section.
 
 ## Usage
 
@@ -125,6 +141,19 @@ type KZGProofWithCells = {
     proofs: string[] // Array of 128 proofs, each 48 bytes
     cells: string[]  // Array of 128 cells, each 2048 bytes
 }
+```
+
+## Performance Comparison
+
+The following numbers can give you some idea of the performance of the library. Note that these are rather "napkin numbers" and no benchmarks (30 runs each using Chrome), but they should nevertheless give you an idea if this wrapper library is a good fit for your use case.
+
+```shell
+WASM KZG: 27.866666666666667 ms per commitment
+JS KZG: 4.466666666666667 ms per commitment
+WASM KZG: 276.06666666666666 ms per proof
+JS KZG: 644.7666666666667 ms per proof
+WASM KZG: 12.233333333333333 ms per verify proof
+JS KZG: 28.333333333333332 ms per verify proof
 ```
 
 ## Development
